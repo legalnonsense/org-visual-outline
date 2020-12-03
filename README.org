@@ -1,6 +1,6 @@
-This is my first working hack at providing a visual outline tree. The code is a mess and needs a major re-write, preferably by someone who knows more than me about how things work. 
+This is a first working hack at providing a visual outline tree. The code is a mess and needs a major re-write, preferably by someone who knows more than me about how things work. 
 
-It relies on a combination of org-indent (via advising =org-indent-add-properties=) and font-lock.
+It relies on a combination of org-indent (via advising =org-indent-add-properties=) and font-lock. I don’t defend any programming choice I made here, and would not put it out there unless I thought there was hope someone else might take it from me. 
 
 The display is updated via various hooks (found in =org-visual-outline-refresh-hooks=) and advising certain other functions (found in =org-visual-outline-refresh-funcs=).
 
