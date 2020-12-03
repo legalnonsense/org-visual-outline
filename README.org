@@ -9,7 +9,7 @@ The display is updated via various hooks (found in =org-visual-outline-refresh-h
 The icons are meaningful. =▶= means the heading has children and is folded. =▼= means the heading is unfolded. 
 =▬= means the heading does not have any children. If the icon is filled (i.e., =▬= or =▼=), it means the heading has text in its body. If the icon is not filled (i.e., =▭= or =▽)=, it means there is no body text. 
 
-(This means that =org-ellipsis= is not needed, because you know if a subtree is folded, and whether there is text in the body. So, you can hide it by setting its foreground face to your background color.)
+(This also means that =org-ellipsis= is not needed, because you know if a subtree is folded, and whether there is text in the body. So, you can hide the ellipsis by setting its foreground face to your background color.)
 
 I do not know what performance costs this has. So far, I have been able to use it without issue aside from some slowdown when unfolding headings with a lot of text. This can be mitigated by using a more responsible re-drawing function. 
 
@@ -22,6 +22,6 @@ Previous attempts provided clearer outline tree (e.g., using joints like └ and
 └▭ II.
 #+end_src
 
-I thought this was too noisy, so abandoned it.
+I thought this was too noisy, so abandoned it. The vertical lines are connected now because they use a face that sets the background color and sets a height of .1. 
 
-Any thoughts welcome. Or please fork it and fix it. 
+Any thoughts welcome. Or please fork it and fix it up. 
