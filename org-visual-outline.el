@@ -43,18 +43,19 @@
 ;;      "List of functions which trigger updating the display.")
 
 (setq org-visual-outline--outline-chars 
-      `((CHILDREN_T_FOLDED_T_BODY_T . "▶")
-	(CHILDREN_T_FOLDED_T_BODY_NIL . "▷")
-	(CHILDREN_T_FOLDED_NIL_BODY_T . "▼")
-	(CHILDREN_T_FOLDED_NIL_BODY_NIL . "▽")
-	(CHILDREN_NIL_BODY_T  . "▬")
-	(CHILDREN_NIL_BODY_NIL  . "▭")
+      `((CHILDREN-T-FOLDED-T-BODY-T . "▶")
+	(CHILDREN-T-FOLDED-T-BODY-NIL . "▷")
+	(CHILDREN-T-FOLDED-NIL-BODY-T . "▼")
+	(CHILDREN-T-FOLDED-NIL-BODY-NIL . "▽")
+	(CHILDREN-NIL-BODY-T  . "▬")
+	(CHILDREN-NIL-BODY-NIL  . "▭")
 	(DASH . "─")
 	(PIPE . ,(org-add-props "│"
 		     '(face org-visual-outline-pipe-face)))
-	(BLANK_PIPE . ,(org-add-props "│"
+	(BLANK-PIPE . ,(org-add-props "│"
 			   '(face org-visual-outline-blank-pipe-face)))
-	(BLANK . "   ")))
+	(BLANK . "   "))
+      ;; "outline characters")
 
 ;;; Getting outline data 
 
@@ -110,28 +111,28 @@ headings leading starts."
 		       (cl-loop for prefix in (reverse prefixes)
 				concat prefix))))))
        (concat
-	(alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
-	(alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
-	(alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
-	(alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
+	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
+	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
+	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
+	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
 	(substring prefix 0 -1)
 	;; (when (not (= (org-current-level) 0))
 	;;   "─")
-        (alist-get 'BLANK_PIPE org-visual-outline--outline-chars)))
+        (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)))
      
      ;; Suffix -- i.e., the bullet
      (cond ((and children folded body)
-	    (alist-get 'CHILDREN_T_FOLDED_T_BODY_T org-visual-outline--outline-chars))
+	    (alist-get 'CHILDREN-T-FOLDED-T-BODY-T org-visual-outline--outline-chars))
 	   ((and children folded (not body))
-	    (alist-get 'CHILDREN_T_FOLDED_T_BODY_NIL org-visual-outline--outline-chars))
+	    (alist-get 'CHILDREN-T-FOLDED-T-BODY-NIL org-visual-outline--outline-chars))
 	   ((and children (not folded) body)
-	    (alist-get 'CHILDREN_T_FOLDED_NIL_BODY_T org-visual-outline--outline-chars))
+	    (alist-get 'CHILDREN-T-FOLDED-NIL-BODY-T org-visual-outline--outline-chars))
 	   ((and children (not folded) (not body))
-	    (alist-get 'CHILDREN_T_FOLDED_NIL_BODY_NIL org-visual-outline--outline-chars))
+	    (alist-get 'CHILDREN-T-FOLDED-NIL-BODY-NIL org-visual-outline--outline-chars))
 	   ((and (not children) body)
-	    (alist-get 'CHILDREN_NIL_BODY_T org-visual-outline--outline-chars))
+	    (alist-get 'CHILDREN-NIL-BODY-T org-visual-outline--outline-chars))
 	   ((and (not children) (not body))
-	    (alist-get 'CHILDREN_NIL_BODY_NIL org-visual-outline--outline-chars))
+	    (alist-get 'CHILDREN-NIL-BODY-NIL org-visual-outline--outline-chars))
 	   (t (error "You missed something."))))))
 
 (defun org-visual-outline--create-plain-line-prefix ()
@@ -148,13 +149,13 @@ headings leading starts."
 	       (alist-get 'BLANK org-visual-outline--outline-chars))
 	      prefixes)
       (push (concat
-	     (alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
+	     (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
 	     (alist-get 'BLANK org-visual-outline--outline-chars))
 	    prefixes))
-    (concat (alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
-	    (alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
-	    (alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
-	    (alist-get 'BLANK_PIPE org-visual-outline--outline-chars)
+    (concat (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
+	    (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
+	    (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
+	    (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
 	    (cl-loop for prefix in (reverse prefixes)
 		     concat prefix))))
 
