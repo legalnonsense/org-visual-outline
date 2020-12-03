@@ -54,7 +54,7 @@
 		     '(face org-visual-outline-pipe-face)))
 	(BLANK-PIPE . ,(org-add-props "│"
 			   '(face org-visual-outline-blank-pipe-face)))
-	(BLANK . "   "))
+	(BLANK . "   ")))
       ;; "outline characters")
 
 ;;; Getting outline data 
