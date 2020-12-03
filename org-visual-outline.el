@@ -1,38 +1,46 @@
 ;;; org-visual-outline.el --- Visualized outline tree -*- lexical-binding: t; -*-
 
-(defvar org-visual-outline--heading-re "^\\(?1:\\**\\) "
-  "Outline heading regexp")
 
-(defvar org-visual-outline--font-lock-keyword
-  `((,org-visual-outline--heading-re
-     (1 (list 'face 'org-visual-outline-face
- 	      'display (org-visual-outline--create-heading-string)))))
-  "Font-lock keyword to fontify heading stars.")
-
-(defcustom org-visual-outline-refresh-hooks '(org-cycle-hook
-					      org-after-demote-entry-hook
-					      org-after-promote-entry-hook
-					      org-insert-heading-hook)
-  "List of hooks which update the display.")
-
-(defcustom org-visual-outline-refresh-funcs '(org-show-children
-					      org-show-all
-					      org-show-entry
-					      org-show-subtree
-					      org-show-siblings
-					      org-show-context)
-  "List of functions which trigger updating the display.")
 
 (defface org-visual-outline-face '((t (:foreground "gray")))
   "Heading face")
 
-(defface org-visual-outline-pipe-face '((t (:foreground "gray" :background "gray" :height .1)))
+(defface org-visual-outline-pipe-face `((t (:foreground ,(face-foreground 'org-visual-outline-face)
+							:background ,(face-foreground 'org-visual-outline-face)
+							:height .1)))
   "Vertical bar face. Should match `org-visual-line-face' except with a different height. 
 (.1 recommended).")
 
-(defface org-visual-outline-blank-pipe-face '((t (:foreground "gray10" :background "gray10" :height .1)))
+(defface org-visual-outline-blank-pipe-face `((t (:foreground ,(face-background 'default)
+							      :background ,(face-background 'default)
+							      :height .1)))
   "Blank vertical bar face. Should match the background, and have the same height as 
 `org-visaul-outline-pipe-face'.")
+
+
+
+(setq org-visual-outline--heading-re "^\\(?1:\\**\\) ")
+;;      "Outline heading regexp")
+
+(setq org-visual-outline--font-lock-keyword
+      `((,org-visual-outline--heading-re
+	 (1 (list 'face 'org-visual-outline-face
+ 		  'display (org-visual-outline--create-heading-string))))))
+;;      "Font-lock keyword to fontify heading stars.")
+
+(setq org-visual-outline-refresh-hooks '(org-cycle-hook
+					 org-after-demote-entry-hook
+					 org-after-promote-entry-hook
+					 org-insert-heading-hook))
+;;      "List of hooks which update the display.")
+
+(setq org-visual-outline-refresh-funcs '(org-show-children
+					 org-show-all
+					 org-show-entry
+					 org-show-subtree
+					 org-show-siblings
+					 org-show-context))
+;;      "List of functions which trigger updating the display.")
 
 (setq org-visual-outline--outline-chars 
       `((CHILDREN_T_FOLDED_T_BODY_T . "▶")
@@ -74,7 +82,7 @@ return the point of the next child."
 (defun org-visual-outline--body-p ()
   "Does the current heading have any text in its body? 
 \"Body\" is defined as any text, including property drawers, 
-following the heading."
+following the heading and before the next heading."
   (cddr (car (org-element--parse-elements
 	      (point)
 	      (save-excursion (or (outline-next-heading)
