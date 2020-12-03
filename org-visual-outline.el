@@ -1,32 +1,38 @@
 ;;; org-visual-outline.el --- Visualized outline tree -*- lexical-binding: t; -*-
 
-(setq org-visual-outline--heading-re "^\\(?1:\\**\\) ")
+(defvar org-visual-outline--heading-re "^\\(?1:\\**\\) "
+  "Outline heading regexp")
 
-(setq org-visual-outline--font-lock-keyword
-      `((,org-visual-outline--heading-re
-	 (1 (list 'face 'org-visual-outline-face
- 		  'display (org-visual-outline--create-heading-string))))))
-;;  "Font-lock keyword to fontify heading stars.")
+(defvar org-visual-outline--font-lock-keyword
+  `((,org-visual-outline--heading-re
+     (1 (list 'face 'org-visual-outline-face
+ 	      'display (org-visual-outline--create-heading-string)))))
+  "Font-lock keyword to fontify heading stars.")
 
-(setq org-visual-outline-refresh-hooks '(org-cycle-hook
-					 org-after-demote-entry-hook
-					 org-after-promote-entry-hook
-					 org-insert-heading-hook))
-;;      "List of hooks which update the display.")
+(defcustom org-visual-outline-refresh-hooks '(org-cycle-hook
+					      org-after-demote-entry-hook
+					      org-after-promote-entry-hook
+					      org-insert-heading-hook)
+  "List of hooks which update the display.")
 
-(setq org-visual-outline-refresh-funcs '(org-show-children
-					 org-show-all
-					 org-show-entry
-					 org-show-subtree
-					 org-show-siblings
-					 org-show-context))
+(defcustom org-visual-outline-refresh-funcs '(org-show-children
+					      org-show-all
+					      org-show-entry
+					      org-show-subtree
+					      org-show-siblings
+					      org-show-context)
+  "List of functions which trigger updating the display.")
 
 (defface org-visual-outline-face '((t (:foreground "gray")))
-  "face")
+  "Heading face")
+
 (defface org-visual-outline-pipe-face '((t (:foreground "gray" :background "gray" :height .1)))
-  "adsf")
+  "Vertical bar face. Should match `org-visual-line-face' except with a different height. 
+(.1 recommended).")
+
 (defface org-visual-outline-blank-pipe-face '((t (:foreground "gray10" :background "gray10" :height .1)))
-  "adsf")
+  "Blank vertical bar face. Should match the background, and have the same height as 
+`org-visaul-outline-pipe-face'.")
 
 (setq org-visual-outline--outline-chars 
       `((CHILDREN_T_FOLDED_T_BODY_T . "▶")
@@ -170,7 +176,8 @@ This function is used in place of `org-indent-set-line-properties'."
 	(progn 
 	  (add-text-properties
 	   (line-beginning-position) (line-beginning-position 2)
-	   `(wrap-prefix ,(substring prefix 0 -1) line-prefix ""))
+	   `(wrap-prefix ,(substring prefix 0 -1)
+			 line-prefix ""))
 	  (forward-line))
       ;; Once we start putting properties on a non-heading line,
       ;; continue until the next heading to avoid recalculating
@@ -182,91 +189,45 @@ This function is used in place of `org-indent-set-line-properties'."
 	 `(line-prefix ,prefix wrap-prefix ,prefix))
 	(forward-line)))))
 
-;; (defun org-visual-outline--org-indent-add-properties (beg end &optional delay)
-;;   "When using org-visual-outline-mode, call this function 
-;; instead of  `org-indent-add-properties'."
-;;   (save-match-data
-;;     (goto-char beg)
-;;     (beginning-of-line)
-;;     ;; Initialize prefix at BEG, according to current entry's level.
-;;     (let* ((case-fold-search t)
-;; 	   (limited-re (org-get-limited-outline-regexp))
-;; 	   (level (or (org-current-level) 0))
-;; 	   (time-limit (and delay (org-time-add nil delay))))
-;;       ;; For each line, set `line-prefix' and `wrap-prefix'
-;;       ;; properties depending on the type of line (headline, inline
-;;       ;; task, item or other).
-;;       (with-silent-modifications
-;; 	(while (and (<= (point) end) (not (eobp)))
-;; 	  (cond
-;; 	   ;; When in asynchronous mode, check if interrupt is
-;; 	   ;; required.
-;; 	   ((and delay (input-pending-p)) (throw 'interrupt (point)))
-;; 	   ;; In asynchronous mode, take a break of
-;; 	   ;; `org-indent-agent-resume-delay' every DELAY to avoid
-;; 	   ;; blocking any other idle timer or process output.
-;; 	   ((and delay (org-time-less-p time-limit nil))
-;; 	    (setq org-indent-agent-resume-timer
-;; 		  (run-with-idle-timer
-;; 		   (time-add (current-idle-time) org-indent-agent-resume-delay)
-;; 		   nil #'org-indent-initialize-agent))
-;; 	    (throw 'interrupt (point)))
-;; 	   ((looking-at org-outline-regexp)
-;; 	    (forward-line))
-;; 	   ;;(org-visual-outline--set-line-properties))
-;; 	   ((org-at-item-p)
-;; 	    (org-visual-outline--set-line-properties))
-;; 	   (t
-;; 	    (org-visual-outline--set-line-properties))))))))
-
 (defun org-visual-outline--org-indent-add-properties (beg end &optional delay)
-  "Advice for `org-indent-add-properties' to change the call from 
-`org-indent-set-line-properties' to `org-visual-outline--set-line-properties'.
-Otherwise retain the functionality of `org-indent-add-properties'.
-
-Add indentation properties between BEG and END.
-
-When DELAY is non-nil, it must be a time value.  In that case,
-the process is asynchronous and can be interrupted, either by
-user request, or after DELAY.  This is done by throwing the
-`interrupt' tag along with the buffer position where the process
-stopped."
-  (save-match-data
-    (goto-char beg)
-    (beginning-of-line)
-    ;; Initialize prefix at BEG, according to current entry's level.
-    (let* ((case-fold-search t)
-	   (limited-re (org-get-limited-outline-regexp))
-	   (level (or (org-current-level) 0))
-	   (time-limit (and delay (org-time-add nil delay))))
-      ;; For each line, set `line-prefix' and `wrap-prefix'
-      ;; properties depending on the type of line (headline, inline
-      ;; task, item or other).
-      (with-silent-modifications
-	(while (and (<= (point) end) (not (eobp)))
-	  (cond
-	   ;; When in asynchronous mode, check if interrupt is
-	   ;; required.
-	   ((and delay (input-pending-p)) (throw 'interrupt (point)))
-	   ;; In asynchronous mode, take a break of
-	   ;; `org-indent-agent-resume-delay' every DELAY to avoid
-	   ;; blocking any other idle timer or process output.
-	   ((and delay (org-time-less-p time-limit nil))
-	    (setq org-indent-agent-resume-timer
-		  (run-with-idle-timer
-		   (time-add (current-idle-time) org-indent-agent-resume-delay)
-		   nil #'org-indent-initialize-agent))
-	    (throw 'interrupt (point)))
-	   ;; Headline or inline task.
-	   ((looking-at org-outline-regexp)
-	    (org-visual-outline--set-line-properties))
-	   ;; List item: `wrap-prefix' is set where body starts.
-	   ;; TODO: Fix item identation
-	   ((org-at-item-p)
-	    (org-visual-outline--set-line-properties))
-	   ;; Regular line.
-	   (t
-	    (org-visual-outline--set-line-properties))))))))
+"Advice for `org-indent-add-properties' to change the call from 
+`org-indent-set-line-properties' to `org-visual-outline--set-line-properties'."
+(save-match-data
+  (goto-char beg)
+  (beginning-of-line)
+  ;; Initialize prefix at BEG, according to current entry's level.
+  (let* ((case-fold-search t)
+	 (limited-re (org-get-limited-outline-regexp))
+	 (level (or (org-current-level) 0))
+	 (time-limit (and delay (org-time-add nil delay))))
+    ;; For each line, set `line-prefix' and `wrap-prefix'
+    ;; properties depending on the type of line (headline, inline
+    ;; task, item or other).
+    (with-silent-modifications
+      (while (and (<= (point) end) (not (eobp)))
+	(cond
+	 ;; When in asynchronous mode, check if interrupt is
+	 ;; required.
+	 ((and delay (input-pending-p)) (throw 'interrupt (point)))
+	 ;; In asynchronous mode, take a break of
+	 ;; `org-indent-agent-resume-delay' every DELAY to avoid
+	 ;; blocking any other idle timer or process output.
+	 ((and delay (org-time-less-p time-limit nil))
+	  (setq org-indent-agent-resume-timer
+		(run-with-idle-timer
+		 (time-add (current-idle-time) org-indent-agent-resume-delay)
+		 nil #'org-indent-initialize-agent))
+	  (throw 'interrupt (point)))
+	 ;; Headline or inline task.
+	 ;; ((looking-at org-outline-regexp)
+	 ;;    (org-visual-outline--set-line-properties))
+	 ;; ;; List item: `wrap-prefix' is set where body starts.
+	 ;; ;; TODO: Fix item identation
+	 ;; ((org-at-item-p)
+	 ;;  (org-visual-outline--set-line-properties))
+	 ;; ;; Regular line.
+	 (t
+	  (org-visual-outline--set-line-properties))))))))
 
 (defun org-visual-outline--org-indent-add-properties-advice
     (func beg end &optional delay)
