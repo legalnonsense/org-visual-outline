@@ -101,16 +101,16 @@ headings leading starts."
     (concat
      ;; Prefix -- must match the plain line prefix 
      (when-let ((prefix
-		 (save-excursion
-		   (let ((prefixes (cl-loop
-				    while (org-up-heading-safe)
-				    collect
-				    (concat (alist-get 'PIPE org-visual-outline--outline-chars)
-					    (alist-get 'BLANK org-visual-outline--outline-chars)))))
-		     (when prefixes
-		       (cl-loop for prefix in (reverse prefixes)
-				concat prefix))))))
+		 (let ((prefixes
+			(cl-loop for x from 1 to (1- (org-current-level))
+				 collect
+				 (concat (alist-get 'PIPE org-visual-outline--outline-chars)
+					 (alist-get 'BLANK org-visual-outline--outline-chars)))))
+		   (when prefixes
+		     (cl-loop for prefix in (reverse prefixes)
+			      concat prefix)))))
        (concat
+	;; Temporary; trying to figure out how to make characters line up
 	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
 	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
 	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)
@@ -118,8 +118,7 @@ headings leading starts."
 	(substring prefix 0 -1)
 	;; (when (not (= (org-current-level) 0))
 	;;   "─")
-        (alist-get 'BLANK-PIPE org-visual-outline--outline-chars)))
-     
+	(alist-get 'BLANK-PIPE org-visual-outline--outline-chars)))
      ;; Suffix -- i.e., the bullet
      (cond ((and children folded body)
 	    (alist-get 'CHILDREN-T-FOLDED-T-BODY-T org-visual-outline--outline-chars))
@@ -137,12 +136,11 @@ headings leading starts."
 
 (defun org-visual-outline--create-plain-line-prefix ()
   "Create the prefix for plain line entries."
-  (let ((prefixes (save-excursion
-		    (cl-loop
-		     while (org-up-heading-safe)
-		     collect
-		     (concat (alist-get 'PIPE org-visual-outline--outline-chars)
-			     (alist-get 'BLANK org-visual-outline--outline-chars))))))
+  (let ((prefixes
+	 (cl-loop for x from 1 to (1- (org-current-level))
+		  collect
+		  (concat (alist-get 'PIPE org-visual-outline--outline-chars)
+			  (alist-get 'BLANK org-visual-outline--outline-chars)))))
     (if (org-visual-outline--has-children-p)
 	(push (concat
 	       (alist-get 'PIPE org-visual-outline--outline-chars)
