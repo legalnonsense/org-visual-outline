@@ -212,11 +212,11 @@ following the heading and before the next heading."
 ;;;;; Creating prefix strings
 
 (defun org-visual-outline--calculate-prefix ()
-  "Calculate the initial prefix string headings
-or plain text lines. Because the results must 
-be processed by the calling functions, this returns
-a list of strings, with each element being one level
-of indentation."
+  "Calculate the initial prefix string headings or plain text lines. 
+Because the results must be processed by the calling functions, this returns
+a list of strings, with each element being one level of indentation. 
+See, e.g., `org-visual-outline--create-plain-line-prefix' (modifying list
+before use)."
   (when-let ((level (org-current-level)))
     (cl-loop for x from 1 to (1- level)
 	     collect
@@ -231,12 +231,14 @@ headings leading starts."
 	(body (org-visual-outline--body-p))
 	(prefix (org-visual-outline--calculate-prefix)))
     ;; You might think that this prefix should be placed
-    ;; by `org-indent.' For reasons I don't understand,
-    ;; you are wrong.  The line-prefix for the headings needs
-    ;; to be placed via font-lock to work properly.  Oddly,
-    ;; `org-indent' does a good job of handling the wrap-prefix
-    ;; for headlines. 
+    ;; by `org-indent' in `org-visual-outline--set-line-properties'
+    ;; and that this function should only handle determining the
+    ;; correct bullet.  For reasons I don't understand, you are wrong.
+    ;; The line-prefix for the headings needs to be placed via font-lock
+    ;; to work properly.  Oddly, `org-indent' does a good job of handling
+    ;; the wrap-prefix for headlines. 
     (concat
+     ;; The vertical line prefix
      (when (and prefix
 		org-visual-outline-show-lines)
        (concat org-visual-outline-small-span 
@@ -245,7 +247,7 @@ headings leading starts."
 			 concat s)
 		0 -1)
 	       org-visual-outline-blank-pipe))
-     ;; Suffix -- i.e., the bullet
+     ;; The bullet
      (cond ((and children folded body)
 	    org-visual-outline-folded-body-text-bullet)
 	   ((and children folded)
@@ -299,36 +301,26 @@ This function is used in place of `org-indent-set-line-properties'."
 	(forward-line)))))
 
 (defun org-visual-outline--org-indent-add-properties (beg end &optional delay)
-"Advice for `org-indent-add-properties' to change the call from 
-`org-indent-set-line-properties' to `org-visual-outline--set-line-properties'."
-(save-match-data
-  (goto-char beg)
-  (beginning-of-line)
-  ;; Initialize prefix at BEG, according to current entry's level.
-  (let* ((case-fold-search t)
-	 (time-limit (and delay (org-time-add nil delay))))
-    ;; For each line, set `line-prefix' and `wrap-prefix'
-    ;; properties depending on the type of line (headline, inline
-    ;; task, item or other).
-    (with-silent-modifications
-      (while (and (<= (point) end) (not (eobp)))
-	(cond
-	 ;; When in asynchronous mode, check if interrupt is
-	 ;; required.
-	 ((and delay (input-pending-p)) (throw 'interrupt (point)))
-	 ;; In asynchronous mode, take a break of
-	 ;; `org-indent-agent-resume-delay' every DELAY to avoid
-	 ;; blocking any other idle timer or process output.
-	 ((and delay (org-time-less-p time-limit nil))
-	  (setq org-indent-agent-resume-timer
-		(run-with-idle-timer
-		 (time-add (current-idle-time) org-indent-agent-resume-delay)
-		 nil #'org-indent-initialize-agent))
-	  (throw 'interrupt (point)))
-	 ;; TODO: figure out if we need to distinguish between being
-	 ;; at a heading, item, or plain line. I don't think it's necessary. 
-	 (t
-	  (org-visual-outline--set-line-properties))))))))
+  "Advice for `org-indent-add-properties' to change the call from 
+`org-indent-set-line-properties' to `org-visual-outline--set-line-properties'.
+See the orginial function for documentation."
+  (save-match-data
+    (goto-char beg)
+    (beginning-of-line)
+    (let* ((case-fold-search t)
+	   (time-limit (and delay (org-time-add nil delay))))
+      (with-silent-modifications
+	(while (and (<= (point) end) (not (eobp)))
+	  (cond
+	   ((and delay (input-pending-p)) (throw 'interrupt (point)))
+	   ((and delay (org-time-less-p time-limit nil))
+	    (setq org-indent-agent-resume-timer
+		  (run-with-idle-timer
+		   (time-add (current-idle-time) org-indent-agent-resume-delay)
+		   nil #'org-indent-initialize-agent))
+	    (throw 'interrupt (point)))
+	   (t
+	    (org-visual-outline--set-line-properties))))))))
 
 (defun org-visual-outline--org-indent-add-properties-advice
     (func beg end &optional delay)
@@ -344,18 +336,18 @@ do not disturb the call to `org-indent-add-properties'."
 ;;;;; Refreshing display
 
 (defun org-visual-outline--fontify (beg end)
-  "Function to fontify the leading starts from BEG to END. 
-Seems efficient. From a test running on an entire buffer:
+  "Fontify only the leading starts from BEG to END. 
+Seems efficient compared to the hammer of font-lock. 
+From a test running on an entire buffer:
 
 | Form                         | x faster than next | Total runtime |
 |------------------------------+--------------------+---------------+
 | org-visual-outline--fontify  | 1689.81            |      0.000126 |
 | font-lock-fontify-region     | slowest            |      0.212215 |
 
-For now, however, the only function that uses this is 
+For now, the only function that uses this is 
 `org-visual-outline--fontify-tree', which is overkill for the vast
-majority of folding and promoting/demoting actions.
-"
+majority of folding and promoting/demoting actions."
   (goto-char beg)
   (while 
       (re-search-forward org-heading-regexp end t)
@@ -419,7 +411,6 @@ the refresh function is called."
 	  (org-bullets-mode -1))
 	(when (fboundp 'org-superstar-mode)
 	  (org-superstar-mode -1))
-
 	(when org-visual-outline-show-lines
 	  (org-indent-mode -1)
 	  (setq-local org-indent-mode-turns-off-org-adapt-indentation t
@@ -428,7 +419,6 @@ the refresh function is called."
 	  (advice-add 'org-indent-add-properties :around
 		      #'org-visual-outline--org-indent-add-properties-advice)
 	  (org-indent-mode 1))
-	
 	(cl-pushnew 'display font-lock-extra-managed-props)
 	(font-lock-add-keywords nil org-visual-outline--font-lock-keyword)
 	(mapc (lambda (hook) 
@@ -440,7 +430,6 @@ the refresh function is called."
 		       #'org-visual-outline--refresh-advice))
 	 org-visual-outline-refresh-funcs)
 	(font-lock-ensure (point-min) (point-max)))
-
     ;; Disabling: 
     (advice-remove 'org-indent-add-properties
 		   #'org-visual-outline--org-indent-add-properties-advice)
