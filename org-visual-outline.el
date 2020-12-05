@@ -174,12 +174,6 @@
   "Get the level of the current heading"
   (org-current-level))
 
-;; (defun org-visual-outline--last-sibling-p ()
-;;   "Return nil if the current node is the last child. Otherwise, 
-;; return the point of the next child." 
-;;   (save-excursion 
-;;     (not (outline-get-next-sibling))))
-
 (defun org-visual-outline--heading-folded-p ()
   "Is the current heading folded?"
   (save-excursion
@@ -296,8 +290,6 @@ This function is used in place of `org-indent-set-line-properties'."
   (beginning-of-line)
   ;; Initialize prefix at BEG, according to current entry's level.
   (let* ((case-fold-search t)
-	 (limited-re (org-get-limited-outline-regexp))
-	 (level (or (org-current-level) 0))
 	 (time-limit (and delay (org-time-add nil delay))))
     ;; For each line, set `line-prefix' and `wrap-prefix'
     ;; properties depending on the type of line (headline, inline
