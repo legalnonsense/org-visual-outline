@@ -69,32 +69,39 @@
 ;;;; Faces
 
 (defface org-visual-outline-face '((t (:foreground "gray")))
-  "Heading face")
+  "Heading face"
+  :group 'org-visual-outline)
 
 (defface org-visual-outline-pipe-face `((t (:foreground ,(face-foreground 'org-visual-outline-face)
 							:background ,(face-foreground 'org-visual-outline-face)
 							:height .1)))
-  "Vertical bar face. Recommend a height property of .1.")
+  "Vertical bar face. Recommend a height property of .1."
+  :group 'org-visual-outline)
 
 (defface org-visual-outline-blank-pipe-face `((t (:foreground ,(face-background 'default)
 							      :background ,(face-background 'default)
 							      :height .1)))
   "Blank vertical bar face. Should match the background; must have the same height as 
-`org-visual-outline-pipe-face'.")
+`org-visual-outline-pipe-face'."
+  :group 'org-visual-outline)
 
 ;;;; Customization 
 
 (defcustom org-visual-outline-show-lines t
-  "Show vertical lines to indicate outline depth?")
+  "Show vertical lines to indicate outline depth?"
+  :type 'boolean
+  :group 'org-visual-outline)
 
 ;; TODO: Figure out the most efficient way to refresh the bullets.
-;;       As it stands, this is overkill. 
+;;       As it stands, this is overkill.  See `org-visual-outline--fontify'
+;;       functions. 
 (defcustom org-visual-outline-refresh-hooks '(org-cycle-hook
 					      org-insert-heading-hook
 					      org-after-demote-entry-hook
 					      org-after-promote-entry-hook)
   "List of hooks which update the display."
-  :type 'list)
+  :type 'list
+  :group 'org-visual-outline)
 
 ;; TODO: See above. 
 (defcustom org-visual-outline-refresh-funcs '(org-show-children
@@ -106,35 +113,43 @@
 					      org-show-siblings
 					      org-show-context)
   "List of functions which trigger updating the display."
-  :type 'list)
+  :type 'list
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-folded-body-text-bullet "▶"
   "Bullet for a folded node with text in its body."
-  :type 'string)
+  :type 'string
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-folded-no-body-text-bullet "▷"
   "Bullet for folded node with no text in its body."
-  :type 'string)
+  :type 'string
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-unfolded-body-text-bullet "▼"
   "Bullet for an unfolded node with text in its body."
-  :type 'string)
+  :type 'string
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-unfolded-no-body-text-bullet "▽"
   "Bullet for an unfolded node with no text in its body."
-  :type 'string)
+  :type 'string
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-leaf-body-text-bullet "▬"
   "Bullet for a left node with body text."
-  :type 'string)
+  :type 'string
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-left-no-body-text-bullet "▭"
   "Bullet for a leaf node with no body text."
-  :type 'string)
+  :type 'string
+  :group 'org-visual-outline)
 
 (defcustom org-visual-outline-fontify-func #'org-visual-outline--fontify-tree
-  "Function to fontify outline headings via font-lock.")
-
+  "Function to fontify outline headings via font-lock."
+  :type 'function
+  :group 'org-visual-outline)
 
 ;;;; Constants
 
@@ -420,7 +435,8 @@ the refresh function is called."
 	   (advice-add func :after
 		       #'org-visual-outline--refresh-advice))
 	 org-visual-outline-refresh-funcs)
-	(font-lock-fontify-buffer))
+	(font-lock-ensure (point-min) (point-max)))
+
     ;; Disabling: 
     (advice-remove 'org-indent-add-properties
 		   #'org-visual-outline--org-indent-add-properties-advice)
@@ -432,7 +448,7 @@ the refresh function is called."
      (lambda (func)
        (advice-remove func #'org-visual-outline--refresh-advice))
      org-visual-outline-refresh-funcs)
-    (font-lock-fontify-buffer)))
+    (font-lock-ensure (point-min) (point-max))))
 
 ;;;; Footer 
 
