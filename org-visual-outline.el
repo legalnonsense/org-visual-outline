@@ -213,10 +213,15 @@ headings leading starts."
 	(folded (org-visual-outline--heading-folded-p))
 	(body (org-visual-outline--body-p))
 	(prefix (org-visual-outline--calculate-prefix)))
+    ;; You might think that this prefix should be placed
+    ;; by `org-indent.' For reasons I don't understand,
+    ;; you are wrong.  The line-prefix for the headings needs
+    ;; to be placed via font-lock to work properly.  Oddly,
+    ;; `org-indent' does a good job of handling the wrap-prefix
+    ;; for headlines. 
     (concat
      (when (and prefix
 		org-visual-outline-show-lines)
-       
        (concat 
 	org-visual-outline-blank-pipe
 	org-visual-outline-blank-pipe
@@ -230,17 +235,16 @@ headings leading starts."
      ;; Suffix -- i.e., the bullet
      (cond ((and children folded body)
 	    org-visual-outline-folded-body-text-bullet)
-	   ((and children folded (not body))
+	   ((and children folded)
 	    org-visual-outline-folded-no-body-text-bullet)
-	   ((and children (not folded) body)
+	   ((and children body)
 	    org-visual-outline-unfolded-body-text-bullet)
-	   ((and children (not folded) (not body))
+	   (children
 	    org-visual-outline-unfolded-no-body-text-bullet)
-	   ((and (not children) body)
+	   (body
 	    org-visual-outline-leaf-body-text-bullet)
-	   ((and (not children) (not body))
-	    org-visual-outline-left-no-body-text-bullet)
-	   (t (error "You missed something."))))))
+	   (t 
+	    org-visual-outline-left-no-body-text-bullet)))))
 
 (defun org-visual-outline--create-plain-line-prefix ()
   "Create the prefix for plain line entries."
