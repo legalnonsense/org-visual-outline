@@ -129,6 +129,10 @@
   "Bullet for a leaf node with no body text."
   :type 'string)
 
+(defcustom org-visual-outline-fontify-func #'org-visual-outline--fontify-tree
+  "Function to fontify outline headings via font-lock.")
+
+
 ;;;; Constants
 
 (defconst org-visual-outline-pipe "│"
@@ -368,7 +372,11 @@ Seems efficient. From a test running on an entire buffer:
 		   (point))))
 	(org-visual-outline--fontify beg end)))))
 
-(defun org-visual-outline--refresh-advice (&rest args)
+(defun org-visual-outline--refresh-hook (&rest _)
+  "Hook added to `org-visual-outline-refresh-hooks'."
+  (funcall org-visual-outline-fontify-func))
+
+(defun org-visual-outline--refresh-advice (&rest _)
   "Advice added :after functions listed in
  `org-visual-outline-refresh-funcs'.
 The effect is that any time these functions are called, 
@@ -376,7 +384,8 @@ the refresh function is called."
   (when org-visual-outline-mode
     ;; TODO: Refreshing the entire tree is wasteful.
     ;;       Figure out a more efficient way to do this.
-    (org-visual-outline--fontify-tree)))
+    (funcall org-visual-outline-fontify-func)))
+
 
 ;;; Minor mode
 
@@ -404,7 +413,7 @@ the refresh function is called."
 	(font-lock-add-keywords nil org-visual-outline--font-lock-keyword)
 	;; Refresh hooks
 	(mapc (lambda (hook) 
-		(add-hook hook #'org-visual-outline--fontify t t)) 
+		(add-hook hook #'org-visual-outline--refresh-hook t t)) 
 	      org-visual-outline-refresh-hooks)
 	;; Refresh advice
 	(mapc
@@ -419,11 +428,11 @@ the refresh function is called."
 		   #'org-visual-outline--org-indent-add-properties-advice)
     (font-lock-remove-keywords nil org-visual-outline--font-lock-keyword)
     (mapc (lambda (hook) 
-	    (remove-hook hook #'org-visual-outline--fontify t))
+	    (remove-hook hook #'org-visual-outline--refresh-hook t))
 	  org-visual-outline-refresh-hooks)
     (mapc
      (lambda (func)
-       (advice-remove func #'org-visual-outline--fontify))
+       (advice-remove func #'org-visual-outline--refresh-advice))
      org-visual-outline-refresh-funcs)
     (font-lock-fontify-buffer)))
 
