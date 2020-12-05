@@ -84,6 +84,9 @@
 
 ;;;; Customization 
 
+(defcustom org-visual-outline-show-lines t
+  "Show vertical lines to indicate outline depth?")
+
 ;; TODO: Figure out the most efficient way to refresh the bullets.
 ;;       As it stands, this is overkill. 
 (defcustom org-visual-outline-refresh-hooks '(org-cycle-hook
@@ -211,7 +214,9 @@ headings leading starts."
 	(body (org-visual-outline--body-p))
 	(prefix (org-visual-outline--calculate-prefix)))
     (concat
-     (when prefix
+     (when (and prefix
+		org-visual-outline-show-lines)
+       
        (concat 
 	org-visual-outline-blank-pipe
 	org-visual-outline-blank-pipe
@@ -386,7 +391,6 @@ the refresh function is called."
     ;;       Figure out a more efficient way to do this.
     (funcall org-visual-outline-fontify-func)))
 
-
 ;;; Minor mode
 
 (define-minor-mode org-visual-outline-mode
@@ -400,28 +404,26 @@ the refresh function is called."
 	  (org-bullets-mode -1))
 	(when (fboundp 'org-superstar-mode)
 	  (org-superstar-mode -1))
-	;; Prepare org-indent
-	(org-indent-mode -1)
-	(setq-local org-indent-mode-turns-off-org-adapt-indentation t
-		    org-indent-mode-turns-on-hiding-stars nil
-		    org-hide-leading-stars nil)
-	(advice-add 'org-indent-add-properties :around
-		    #'org-visual-outline--org-indent-add-properties-advice)
-	(org-indent-mode 1)
-	;; Prepare font lock
+
+	(when org-visual-outline-show-lines
+	  (org-indent-mode -1)
+	  (setq-local org-indent-mode-turns-off-org-adapt-indentation t
+		      org-indent-mode-turns-on-hiding-stars nil
+		      org-hide-leading-stars nil)
+	  (advice-add 'org-indent-add-properties :around
+		      #'org-visual-outline--org-indent-add-properties-advice)
+	  (org-indent-mode 1))
+	
 	(cl-pushnew 'display font-lock-extra-managed-props)
 	(font-lock-add-keywords nil org-visual-outline--font-lock-keyword)
-	;; Refresh hooks
 	(mapc (lambda (hook) 
 		(add-hook hook #'org-visual-outline--refresh-hook t t)) 
 	      org-visual-outline-refresh-hooks)
-	;; Refresh advice
 	(mapc
 	 (lambda (func)
 	   (advice-add func :after
 		       #'org-visual-outline--refresh-advice))
 	 org-visual-outline-refresh-funcs)
-	;; Refresh font-lock
 	(font-lock-fontify-buffer))
     ;; Disabling: 
     (advice-remove 'org-indent-add-properties
