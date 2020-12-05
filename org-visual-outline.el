@@ -192,10 +192,6 @@
   "Does the current node have any children?"
   (save-excursion (org-goto-first-child)))
 
-(defun org-visual-outline--get-level ()
-  "Get the level of the current heading"
-  (org-current-level))
-
 (defun org-visual-outline--heading-folded-p ()
   "Is the current heading folded?"
   (save-excursion
