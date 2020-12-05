@@ -84,16 +84,21 @@
 
 ;;;; Customization 
 
+;; TODO: Figure out the most efficient way to refresh the bullets.
+;;       As it stands, this is overkill. 
 (defcustom org-visual-outline-refresh-hooks '(org-cycle-hook
+					      org-insert-heading-hook
 					      org-after-demote-entry-hook
-					      org-after-promote-entry-hook
-					      org-insert-heading-hook)
+					      org-after-promote-entry-hook)
   "List of hooks which update the display."
   :type 'list)
 
+;; TODO: See above. 
 (defcustom org-visual-outline-refresh-funcs '(org-show-children
 					      org-show-all
 					      org-show-entry
+					      org-promote-subtree
+					      org-demote-subtree
 					      org-show-subtree
 					      org-show-siblings
 					      org-show-context)
@@ -103,18 +108,23 @@
 (defcustom org-visual-outline-folded-body-text-bullet "▶"
   "Bullet for a folded node with text in its body."
   :type 'string)
+
 (defcustom org-visual-outline-folded-no-body-text-bullet "▷"
   "Bullet for folded node with no text in its body."
   :type 'string)
+
 (defcustom org-visual-outline-unfolded-body-text-bullet "▼"
   "Bullet for an unfolded node with text in its body."
   :type 'string)
+
 (defcustom org-visual-outline-unfolded-no-body-text-bullet "▽"
   "Bullet for an unfolded node with no text in its body."
   :type 'string)
+
 (defcustom org-visual-outline-leaf-body-text-bullet "▬"
   "Bullet for a left node with body text."
   :type 'string)
+
 (defcustom org-visual-outline-left-no-body-text-bullet "▭"
   "Bullet for a leaf node with no body text."
   :type 'string)
@@ -183,10 +193,11 @@ following the heading and before the next heading."
 ;;;;; Creating prefix strings
 (defun org-visual-outline--calculate-prefix ()
   "Calculate the initial prefix string."
-  (cl-loop for x from 1 to (1- (org-current-level))
-	   collect
-	   (concat org-visual-outline-pipe
-		   org-visual-outline-span)))
+  (when-let ((level (org-current-level)))
+    (cl-loop for x from 1 to (1- level)
+	     collect
+	     (concat org-visual-outline-pipe
+		     org-visual-outline-span))))
 
 (defun org-visual-outline--create-heading-string ()
   "Create a string to be displayed in lieu of the 
@@ -295,14 +306,6 @@ This function is used in place of `org-indent-set-line-properties'."
 	  (throw 'interrupt (point)))
 	 ;; TODO: figure out if we need to distinguish between being
 	 ;; at a heading, item, or plain line. I don't think it's necessary. 
-	 ;; Headline or inline task.
-	 ;; ((looking-at org-outline-regexp)
-	 ;;    (org-visual-outline--set-line-properties))
-	 ;; ;; List item: `wrap-prefix' is set where body starts.
-	 ;; ;; TODO: Fix item identation
-	 ;; ((org-at-item-p)
-	 ;;  (org-visual-outline--set-line-properties))
-	 ;; ;; Regular line.
 	 (t
 	  (org-visual-outline--set-line-properties))))))))
 
@@ -317,26 +320,53 @@ do not disturb the call to `org-indent-add-properties'."
       (org-visual-outline--org-indent-add-properties beg end delay)
     (funcall func beg end delay)))
 
-;;;;; Refreshing display 
+;;;;; Refreshing display
 
-(defun org-visual-outline--fontify (&rest _)
-  "Call `font-lock-fontify-block' and update 
-org-indent properties for the relevant region. 
-Arguments are ignored as this function is called
-through various org-mode hooks."
-  ;; TODO: figure out a better way to determine
-  ;; the size of the region to be fontified.
-  ;;
-  ;; TODO: figure out this needs to include an update
-  ;; to org-indent 
-  (save-excursion 
-    (let ((beg (save-excursion (if (= 0 (org-current-level))
-				   (point)
-				 (while (org-up-heading-safe))
-				 (point))))
-	  (end (save-excursion (outline-end-of-subtree)
-			       (point))))
-      (font-lock-fontify-region beg end))))
+(defun org-visual-outline--fontify (beg end)
+  "Function to fontify the leading starts from BEG to END. 
+Seems efficient. From a test running on an entire buffer:
+
+| Form                         | x faster than next | Total runtime |
+|------------------------------+--------------------+---------------+
+| org-visual-outline--fontify  | 1689.81            |      0.000126 |
+| font-lock-fontify-region     | slowest            |      0.212215 |
+"
+  (goto-char beg)
+  (while 
+      (re-search-forward org-heading-regexp end t)
+    (save-excursion 
+      (font-lock-fontify-region (match-beginning 0)
+				(match-end 0)))))
+
+(defun org-visual-outline--fontify-tree (&rest _)
+  "Fontify the entire tree."
+  (save-excursion
+    (when-let* ((level (org-current-level))
+		(beg (save-excursion (if (= 1 level)
+					 (progn (beginning-of-line)
+						(point))
+				       (while (org-up-heading-safe))
+				       (point))))
+		(end (save-excursion (outline-end-of-subtree)
+				     (point))))
+      (org-visual-outline--fontify beg end))))
+
+(defun org-visual-outline--fontify-heading (&rest _)
+  "Fontify heading only."
+  (save-excursion
+    (when (org-back-to-heading)
+      (org-visual-outline--fontify (point-at-bol)
+				   (point-at-eol)))))
+
+(defun org-visual-outline--fontify-children (&rest _)
+  "Fontify current heading and children."
+  (save-excursion
+    (when (org-back-to-heading)
+      (let ((beg (point-at-bol))
+	    (end (save-excursion 
+		   (outline-end-of-subtree)
+		   (point))))
+	(org-visual-outline--fontify beg end)))))
 
 (defun org-visual-outline--refresh-advice (&rest args)
   "Advice added :after functions listed in
@@ -344,7 +374,9 @@ through various org-mode hooks."
 The effect is that any time these functions are called, 
 the refresh function is called." 
   (when org-visual-outline-mode
-    (org-visual-outline--fontify)))
+    ;; TODO: Refreshing the entire tree is wasteful.
+    ;;       Figure out a more efficient way to do this.
+    (org-visual-outline--fontify-tree)))
 
 ;;; Minor mode
 
@@ -370,9 +402,11 @@ the refresh function is called."
 	;; Prepare font lock
 	(cl-pushnew 'display font-lock-extra-managed-props)
 	(font-lock-add-keywords nil org-visual-outline--font-lock-keyword)
+	;; Refresh hooks
 	(mapc (lambda (hook) 
 		(add-hook hook #'org-visual-outline--fontify t t)) 
 	      org-visual-outline-refresh-hooks)
+	;; Refresh advice
 	(mapc
 	 (lambda (func)
 	   (advice-add func :after
