@@ -210,8 +210,13 @@ following the heading and before the next heading."
 	      nil nil nil nil nil))))
 
 ;;;;; Creating prefix strings
+
 (defun org-visual-outline--calculate-prefix ()
-  "Calculate the initial prefix string."
+  "Calculate the initial prefix string headings
+or plain text lines. Because the results must 
+be processed by the calling functions, this returns
+a list of strings, with each element being one level
+of indentation."
   (when-let ((level (org-current-level)))
     (cl-loop for x from 1 to (1- level)
 	     collect
