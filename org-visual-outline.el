@@ -147,26 +147,33 @@
   :group 'org-visual-outline)
 
 (defcustom org-visual-outline-fontify-func #'org-visual-outline--fontify-tree
-  "Function to fontify outline headings via font-lock."
+  "Function to fontify outline headings via font-lock. Used by 
+`org-visual-outline-refresh-funcs' and `org-visual-outline-refresh-hooks'."
   :type 'function
   :group 'org-visual-outline)
 
 ;;;; Constants
 
 (defconst org-visual-outline-pipe "│"
-  "Pipe character.")
+  "Pipe character.  (For some reason a space does not seem to work.)")
 (put-text-property 0 1
 		   'face 'org-visual-outline-pipe-face
 		   org-visual-outline-pipe)
 
 (defconst org-visual-outline-blank-pipe "│"
-  "Blank pipe character.")
+  "Blank character.  (For some reason a space does not seem to work.).")
 (put-text-property 0 1
 		   'face 'org-visual-outline-blank-pipe-face
 		   org-visual-outline-blank-pipe)
 
 (defconst org-visual-outline-span "   "
-  "Span string.")
+  "Span string to separate vertical lines.")
+
+(defconst org-visual-outline-small-span (concat org-visual-outline-blank-pipe
+						org-visual-outline-blank-pipe
+						org-visual-outline-blank-pipe
+						org-visual-outline-blank-pipe)
+  "Smaller span used to align vertial lines with heading bullets.")
 
 (defconst org-visual-outline--heading-re "^\\(?1:\\**\\) "
   "Outline heading regexp")
@@ -231,16 +238,12 @@ headings leading starts."
     (concat
      (when (and prefix
 		org-visual-outline-show-lines)
-       (concat 
-	org-visual-outline-blank-pipe
-	org-visual-outline-blank-pipe
-	org-visual-outline-blank-pipe
-	org-visual-outline-blank-pipe
-	(substring 
-	 (cl-loop for s in (reverse prefix )
-		  concat s)
-	 0 -1)
-	org-visual-outline-blank-pipe))
+       (concat org-visual-outline-small-span 
+	       (substring 
+		(cl-loop for s in (reverse prefix )
+			 concat s)
+		0 -1)
+	       org-visual-outline-blank-pipe))
      ;; Suffix -- i.e., the bullet
      (cond ((and children folded body)
 	    org-visual-outline-folded-body-text-bullet)
@@ -267,10 +270,7 @@ headings leading starts."
 	     org-visual-outline-blank-pipe
 	     org-visual-outline-span)
 	    prefixes))
-    (concat org-visual-outline-blank-pipe
-	    org-visual-outline-blank-pipe
-	    org-visual-outline-blank-pipe
-	    org-visual-outline-blank-pipe
+    (concat org-visual-outline-small-span
 	    (cl-loop for prefix in (reverse prefixes)
 		     concat prefix))))
 
@@ -350,6 +350,10 @@ Seems efficient. From a test running on an entire buffer:
 |------------------------------+--------------------+---------------+
 | org-visual-outline--fontify  | 1689.81            |      0.000126 |
 | font-lock-fontify-region     | slowest            |      0.212215 |
+
+For now, however, the only function that uses this is 
+`org-visual-outline--fontify-tree', which is overkill for the vast
+majority of folding and promoting/demoting actions.
 "
   (goto-char beg)
   (while 
@@ -359,7 +363,7 @@ Seems efficient. From a test running on an entire buffer:
 				(match-end 0)))))
 
 (defun org-visual-outline--fontify-tree (&rest _)
-  "Fontify the entire tree."
+  "Fontify the entire tree from root to last leaf."
   (save-excursion
     (when-let* ((level (org-current-level))
 		(beg (save-excursion (if (= 1 level)
@@ -372,14 +376,14 @@ Seems efficient. From a test running on an entire buffer:
       (org-visual-outline--fontify beg end))))
 
 (defun org-visual-outline--fontify-heading (&rest _)
-  "Fontify heading only."
+  "Fontify the current heading only."
   (save-excursion
     (when (org-back-to-heading)
       (org-visual-outline--fontify (point-at-bol)
 				   (point-at-eol)))))
 
 (defun org-visual-outline--fontify-children (&rest _)
-  "Fontify current heading and children."
+  "Fontify current heading to last child."
   (save-excursion
     (when (org-back-to-heading)
       (let ((beg (point-at-bol))
@@ -389,7 +393,8 @@ Seems efficient. From a test running on an entire buffer:
 	(org-visual-outline--fontify beg end)))))
 
 (defun org-visual-outline--refresh-hook (&rest _)
-  "Hook added to `org-visual-outline-refresh-hooks'."
+  "Hook function added to hooks listed in
+ `org-visual-outline-refresh-hooks'."
   (funcall org-visual-outline-fontify-func))
 
 (defun org-visual-outline--refresh-advice (&rest _)
@@ -398,8 +403,6 @@ Seems efficient. From a test running on an entire buffer:
 The effect is that any time these functions are called, 
 the refresh function is called." 
   (when org-visual-outline-mode
-    ;; TODO: Refreshing the entire tree is wasteful.
-    ;;       Figure out a more efficient way to do this.
     (funcall org-visual-outline-fontify-func)))
 
 ;;; Minor mode
