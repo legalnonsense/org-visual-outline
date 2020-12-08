@@ -1,4 +1,4 @@
-;;; org-dynamic-bullets.el --- Visualized outline tree -*- lexical-binding: t; -*-
+;;; org-dynamic-bullets.el --- Orgmode dynamic bullets -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020 Jeff Filipovits
 
@@ -73,16 +73,6 @@
   :group 'org-dynamic-bullets)
 
 ;;;; Customization
-
-(defcustom org-dynamic-bullets-show-lines nil
-  "Show vertical lines to indicate outline depth?"
-  :type 'boolean
-  :group 'org-dynamic-bullets)
-
-(defcustom org-dynamic-bullets-hide-ellipsis t
-  "Hide the ellipsis on startup?"
-  :type 'boolean
-  :group 'org-dynamic-bullets)
 
 (defcustom org-dynamic-bullets-update-triggers
   '((org-cycle-hook . org-dynamic-bullets--org-cycle-hook-func)
