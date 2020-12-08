@@ -1,31 +1,13 @@
 [[./screenshot.gif]]
 
-1. Put it in your load path.
-2. =(require 'org-visual-outline)=
-3. =(org-visual-outline-mode)=
+This package is now split into two separate packages: =org-dynamic-bullets= which handles the dynamic bullets, and =org-visual-indent= which adds vertical lines to =org-indent=. They can be used independently. 
 
-This is a first working hack at providing a visual outline tree. The code is a mess and needs a major re-write, preferably by someone who knows more than me about how things work. 
-
-It relies on a combination of org-indent (via advising =org-indent-add-properties=) and font-lock. I don’t defend any programming choice I made here, and would not put it out there unless I thought there was hope someone else might take it from me. 
-
-The display is updated via various hooks (found in =org-visual-outline-refresh-hooks=) and advising certain other functions (found in =org-visual-outline-refresh-funcs=).
-
-The icons are meaningful. =▶= means the heading has children and is folded. =▼= means the heading is unfolded. 
-=▬= means the heading does not have any children. If the icon is filled (i.e., =▬= or =▼=), it means the heading has text in its body. If the icon is not filled (i.e., =▭= or =▽)=, it means there is no body text. 
-
-(This also means that =org-ellipsis= is not needed, because you know if a subtree is folded, and whether there is text in the body. So, you can hide the ellipsis by setting its foreground face to your background color.)
-
-I do not know what performance costs this has. So far, I have been able to use it without issue aside from some slowdown when unfolding headings with a lot of text. This can be mitigated by using a more responsible re-drawing function. 
-
-Previous attempts provided clearer outline tree (e.g., using joints like └ and ├ to more clearly show the outline structure). The problem was there was no way to connect the vertical lines between one line the next, because there (appears) to be no way to fill that space without setting the background color of the point. It looked more like:
-
-#+begin_src org 
-├─▽ I.
-│ ├▭ I.a.
-│ └▭ I.b.
-└▭ II.
+To get the above effect, clone the repository, put it in your load path and:
+#+begin_src emacs-lisp :results silent
+  (require 'org-dynamic-bullets)
+  (require 'org-visual-indent)
+  (org-dynamic-bullets-mode)
+  (org-visual-indent-mode)
 #+end_src
 
-I thought this was too noisy, so abandoned it. The vertical lines are connected now because they use a face that sets the background color and sets a height of .1. 
-
-Any thoughts welcome. Or please fork it and fix it up. 
+=org-dynamic-bullets= does not provide any indentation or way to discern the level of a heading (i.e., it replaces all leading stars with a single bullet and without indentation). If you don't like the vertical lines shown above, use it with vanilla =org-indent-mode=. 
