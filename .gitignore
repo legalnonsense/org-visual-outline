@@ -7,3 +7,5 @@
 /longtest.org
 /old.el
 /org-visual-outline.elc
+*.el#
+*.org#
