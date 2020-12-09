@@ -76,6 +76,7 @@
 
 (defcustom org-dynamic-bullets-update-triggers
   '((org-cycle-hook . org-dynamic-bullets--org-cycle-hook-func)
+    (org-insert-heading . org-dynamic-bullets--fontify-heading-and-previous-sibling)
     (org-promote . org-dynamic-bullets--fontify-heading-and-previous-sibling)
     (org-demote . org-dynamic-bullets--fontify-heading-and-previous-sibling)
     (org-promote-subtree . org-dynamic-bullets--fontify-heading-and-previous-sibling)
@@ -131,6 +132,16 @@ below."
   :type 'string
   :group 'org-dynamic-bullets)
 
+(defcustom org-dynamic-bullets-refresh-func
+  #'org-dynamic-bullets--refresh-with-text-props
+  "Function to refresh bullets.  Must take
+two arguments: BEG and END representing the region
+to be refreshed. Two options are:
+`org-dynamic-bullets--refresh-with-text-props' or
+`org-dynamic-bullets--refresh-with-font-lock'."
+  :type 'function
+  :group 'org-dynamic-bullets)
+
 ;;;; Constants
 
 (defconst org-dynamic-bullets--heading-re "^\\(?1:\\*+\\) "
@@ -156,13 +167,22 @@ below."
 	(when (fboundp 'org-superstar-mode)
 	  (org-superstar-mode -1))
 	(org-dynamic-bullets--add-all-hooks-and-advice)
+	;; TODO: Do we need font lock at all?
+	;; If the refresh function (`org-dynamic-bullets--refresh-with-text-props')
+	;; deals with text properties directly (caveat: and effectively)
+	;; it seems the only purpose of using font-lock to ensure the leading stars
+	;; are replaced with a bullet when the user manually types the stars.
+	;; Does any orgmode user manually type the stars instead of M-RET,
+	;; or similar?  And, even if the user does type the stars, the stars
+	;; will still eventually be fontified when the hooks/funcs in 
+	;; `org-dynamic-bullets-update-triggers' are called. 
 	(cl-pushnew 'display font-lock-extra-managed-props)
 	(font-lock-add-keywords nil org-dynamic-bullets--font-lock-keyword)
 	(org-dynamic-bullets--fontify-buffer))
     (font-lock-remove-keywords nil org-dynamic-bullets--font-lock-keyword)
-    (org-dynamic-bullets--add-all-hooks-and-advice 'remove)
-    (font-lock-flush (point-min) (point-max))
-    (font-lock-ensure (point-min) (point-max))))
+    (org-dynamic-bullets--add-all-hooks-and-advice 'remove))
+  (font-lock-flush (point-min) (point-max))
+  (font-lock-ensure (point-min) (point-max)))
 
 ;;;; Functions
 
@@ -211,24 +231,34 @@ the heading and before the next heading."
 
 ;;;;; Refreshing display
 
+(defun org-dynamic-bullets--refresh-with-text-props (beg end)
+  "Refresh all bullets from BEG to END."
+  ;; This appears to a bit faster than using 
+  ;; (font-lock-fontify-region beg end).
+  (remove-text-properties beg end '(display nil))
+  (put-text-property beg
+		     end
+		     'display
+		     (org-dynamic-bullets--create-heading-bullet)))
+
+(defun org-dynamic-bullets--refresh-with-font-lock (beg end)
+  "Refresh all bullets from BEG to END using 
+`font-lock-fontify-region'."
+  (font-lock-fontify-region beg end))
+
 (defun org-dynamic-bullets--fontify (beg end)
   "Fontify only the leading stars from BEG to END.
-Seems efficient compared to the hammer of `font-lock-fontify-region'.
-From a test running on an entire buffer:
-
-| Form                            | x faster than next | Total runtime |
-|---------------------------------+--------------------+---------------+
-| `org-dynamic-bullets--fontify'  | 1689.81            |      0.000126 |
-| `font-lock-fontify-region'      | slowest            |      0.212215 |
-
-All fontifying functions use this function as their base."
+All fontifying functions use this function as their base.  
+This function searches the region for the headline regexp and calls 
+`org-dynamic-bullets-refresh-func' to act on the matches."
   (save-excursion
     (goto-char beg)
     (while
-	(re-search-forward org-heading-regexp end t)
+	(re-search-forward org-dynamic-bullets--heading-re end t)
       (save-excursion
-	(font-lock-fontify-region (match-beginning 0)
-				  (match-end 0))))))
+	(funcall org-dynamic-bullets-refresh-func
+		 (match-beginning 1)
+		 (match-end 1))))))
 
 (defun org-dynamic-bullets--fontify-buffer (&rest _)
   "Fontify the entire buffer."
