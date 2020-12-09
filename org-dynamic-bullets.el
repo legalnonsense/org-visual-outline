@@ -231,22 +231,23 @@ the heading and before the next heading."
 
 ;;;;; Refreshing display
 
-(defun org-dynamic-bullets--refresh-with-text-props (beg end)
+(defun org-dynamic-bullets--refresh-with-text-props (beg end &optional remove)
   "Refresh all bullets from BEG to END."
   ;; This appears to a bit faster than using 
   ;; (font-lock-fontify-region beg end).
   (remove-text-properties beg end '(display nil))
-  (put-text-property beg
-		     end
-		     'display
-		     (org-dynamic-bullets--create-heading-bullet)))
+  (unless remove
+    (put-text-property beg
+		       end
+		       'display
+		       (org-dynamic-bullets--create-heading-bullet))))
 
 (defun org-dynamic-bullets--refresh-with-font-lock (beg end)
   "Refresh all bullets from BEG to END using 
 `font-lock-fontify-region'."
   (font-lock-fontify-region beg end))
 
-(defun org-dynamic-bullets--fontify (beg end)
+(defun org-dynamic-bullets--fontify (beg end &optional remove)
   "Fontify only the leading stars from BEG to END.
 All fontifying functions use this function as their base.  
 This function searches the region for the headline regexp and calls 
