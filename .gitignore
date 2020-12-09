@@ -10,3 +10,4 @@
 *.el#
 *.org#
 org-visual-outline.el
+*.elc
