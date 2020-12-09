@@ -139,7 +139,7 @@ below."
 (defconst org-dynamic-bullets--font-lock-keyword
   `((,org-dynamic-bullets--heading-re
      (1 (list 'face 'org-dynamic-bullets-face
- 	      'display (org-dynamic-bullets--create-heading-string)))))
+ 	      'display (org-dynamic-bullets--create-heading-bullet)))))
   "Font-lock keyword to fontify heading stars.")
 
 ;;;; Minor mode
@@ -191,7 +191,7 @@ the heading and before the next heading."
 
 ;;;;; Creating prefix strings
 
-(defun org-dynamic-bullets--create-heading-string ()
+(defun org-dynamic-bullets--create-heading-bullet ()
   "Create a string to be displayed in lieu of the headings' leading stars."
   (let ((children (org-dynamic-bullets--has-children-p))
 	(folded (org-dynamic-bullets--heading-folded-p))
@@ -306,7 +306,11 @@ If HOOK-OF-FUNC is a function, add FUNC as advice after HOOK-OR-FUNC.
 if REMOVE is non-nil, remove the hook or advice."
   (pcase hook-or-func
     ((pred (lambda (sym)
-	     (s-ends-with-p "-hook" (symbol-name sym))))
+	     (let ((name (symbol-name sym)))
+	       (and (>= (length name) 6)
+		    (string=
+		     "-hook"
+		     (substring name -5 (length name)))))))
      (if remove
 	 (remove-hook hook-or-func func t)
        (add-hook hook-or-func func nil t)))
