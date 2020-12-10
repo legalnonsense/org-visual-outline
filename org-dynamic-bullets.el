@@ -180,9 +180,9 @@ to be refreshed. Two options are:
 	(font-lock-add-keywords nil org-dynamic-bullets--font-lock-keyword)
 	(org-dynamic-bullets--fontify-buffer))
     (font-lock-remove-keywords nil org-dynamic-bullets--font-lock-keyword)
-    (org-dynamic-bullets--add-all-hooks-and-advice 'remove))
-  (font-lock-flush (point-min) (point-max))
-  (font-lock-ensure (point-min) (point-max)))
+    (org-dynamic-bullets--add-all-hooks-and-advice 'remove)
+    (font-lock-flush (point-min) (point-max))
+    (font-lock-ensure (point-min) (point-max))))
 
 ;;;; Functions
 
