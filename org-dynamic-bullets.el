@@ -336,6 +336,10 @@ This function searches the region for the headline regexp and calls
 If HOOK-OF-FUNC is a function, add FUNC as advice after HOOK-OR-FUNC.
 if REMOVE is non-nil, remove the hook or advice."
   (pcase hook-or-func
+    ((pred (functionp))
+     (if remove
+	 (advice-remove hook-or-func func)
+       (advice-add hook-or-func :after func)))
     ((pred (lambda (sym)
 	     (let ((name (symbol-name sym)))
 	       (and (>= (length name) 6)
@@ -344,11 +348,7 @@ if REMOVE is non-nil, remove the hook or advice."
 		     (substring name -5 (length name)))))))
      (if remove
 	 (remove-hook hook-or-func func t)
-       (add-hook hook-or-func func nil t)))
-    ((pred (functionp))
-     (if remove
-	 (advice-remove hook-or-func func)
-       (advice-add hook-or-func :after func)))))
+       (add-hook hook-or-func func nil t)))))
 
 (defun org-dynamic-bullets--add-all-hooks-and-advice (&optional remove)
   "Add hooks and advice to all members of
