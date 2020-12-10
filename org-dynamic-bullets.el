@@ -133,11 +133,12 @@ below."
   :group 'org-dynamic-bullets)
 
 (defcustom org-dynamic-bullets-refresh-func
-  #'org-dynamic-bullets--refresh-with-text-props
+  #'org-dynamic-bullets--refresh-with-compose-region
   "Function to refresh bullets.  Must take
 two arguments: BEG and END representing the region
 to be refreshed. Two options are:
-`org-dynamic-bullets--refresh-with-text-props' or
+`org-dynamic-bullets--refresh-with-compose-region',
+`org-dynamic-bullets--refresh-with-text-props', or
 `org-dynamic-bullets--refresh-with-font-lock'."
   :type 'function
   :group 'org-dynamic-bullets)
@@ -147,10 +148,16 @@ to be refreshed. Two options are:
 (defconst org-dynamic-bullets--heading-re "^\\(?1:\\*+\\) "
   "Outline heading regexp.")
 
+;; (defconst org-dynamic-bullets--font-lock-keyword
+;;   `((,org-dynamic-bullets--heading-re
+;;      (1 (list 'face 'org-dynamic-bullets-face
+;;  	      'display (org-dynamic-bullets--create-heading-bullet)))))
+;;   "Font-lock keyword to fontify heading stars.")
+
 (defconst org-dynamic-bullets--font-lock-keyword
   `((,org-dynamic-bullets--heading-re
-     (1 (list 'face 'org-dynamic-bullets-face
- 	      'display (org-dynamic-bullets--create-heading-bullet)))))
+     (1 (compose-region (match-beginning 1) (match-end 1)
+			(org-dynamic-bullets--create-heading-bullet)))))
   "Font-lock keyword to fontify heading stars.")
 
 ;;;; Minor mode
@@ -181,6 +188,8 @@ to be refreshed. Two options are:
 	(org-dynamic-bullets--fontify-buffer))
     (font-lock-remove-keywords nil org-dynamic-bullets--font-lock-keyword)
     (org-dynamic-bullets--add-all-hooks-and-advice 'remove)
+    (org-with-wide-buffer
+     (org-dynamic-bullets--fontify (point-min) (point-max) 'remove))
     (font-lock-flush (point-min) (point-max))
     (font-lock-ensure (point-min) (point-max))))
 
@@ -231,18 +240,25 @@ the heading and before the next heading."
 
 ;;;;; Refreshing display
 
-(defun org-dynamic-bullets--refresh-with-text-props (beg end &optional remove)
-  "Refresh all bullets from BEG to END."
-  ;; This appears to a bit faster than using 
-  ;; (font-lock-fontify-region beg end).
-  (remove-text-properties beg end '(display nil))
-  (unless remove
-    (put-text-property beg
-		       end
-		       'display
-		       (org-dynamic-bullets--create-heading-bullet))))
+(defun org-dynamic-bullets--refresh-with-compose-region (beg end &optional remove)
+  (if remove
+      (decompose-region beg end)
+    (compose-region beg end (org-dynamic-bullets--create-heading-bullet))))
 
-(defun org-dynamic-bullets--refresh-with-font-lock (beg end)
+    (defun org-dynamic-bullets--refresh-with-text-props (beg end &optional remove)
+      "Refresh all bullets from BEG to END."
+      ;; This appears to a bit faster than using 
+      ;; (font-lock-fontify-region beg end).
+      (remove-text-properties beg end '(display nil))
+      (unless remove
+	(put-text-property beg
+			   end
+			   'display
+			   (org-dynamic-bullets--create-heading-bullet))))
+
+(defun org-dynamic-bullets--refresh-with-font-lock (beg end &optional remove)
+  ;; NOTE: REMOVE is not used right now.  But it is used for
+  ;; `org-dynamic-bullets--refresh-with-text-props', above. 
   "Refresh all bullets from BEG to END using 
 `font-lock-fontify-region'."
   (font-lock-fontify-region beg end))
@@ -252,14 +268,16 @@ the heading and before the next heading."
 All fontifying functions use this function as their base.  
 This function searches the region for the headline regexp and calls 
 `org-dynamic-bullets-refresh-func' to act on the matches."
-  (save-excursion
-    (goto-char beg)
-    (while
-	(re-search-forward org-dynamic-bullets--heading-re end t)
-      (save-excursion
-	(funcall org-dynamic-bullets-refresh-func
-		 (match-beginning 1)
-		 (match-end 1))))))
+  (org-with-wide-buffer 
+   (save-excursion
+     (save-match-data 
+       (goto-char beg)
+       (while
+	   (re-search-forward org-dynamic-bullets--heading-re end t)
+	 (save-excursion
+	   (funcall org-dynamic-bullets-refresh-func
+		    (match-beginning 1)
+		    (match-end 1))))))))
 
 (defun org-dynamic-bullets--fontify-buffer (&rest _)
   "Fontify the entire buffer."
