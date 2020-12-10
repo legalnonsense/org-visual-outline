@@ -15,3 +15,5 @@ To get the above effect, clone the repository, put it in your load path and:
 =org-dynamic-bullets= does not provide any indentation or way to discern the level of a heading (i.e., it replaces all leading stars with a single bullet and without indentation). If you don't like the vertical lines shown above, use it with vanilla =org-indent-mode=. 
 
 There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The foreground and background color of =org-visual-indent-blank-pipe-face= should match your background. The foreground and background color of =org-visual-indent-pipe-face= should both be the desired color of the vertical line. By default, these colors are set based on the =default= face, which may or may not match the theme you are using if the the package is loaded before your theme is set. 
+
+Please open issues for any bugs. I am still testing this and feedback is welcome. 
