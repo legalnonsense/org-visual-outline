@@ -151,7 +151,6 @@ The function stands in place of `org-indent--compute-prefixes'."
 		       (`inlinetask org-indent--inlinetask-line-prefixes)
 		       (_ org-indent--heading-line-prefixes))
 		     level)))
-
     (add-text-properties (line-beginning-position) (line-beginning-position 2)
 			 `(line-prefix ,line
 				       wrap-prefix
@@ -198,9 +197,10 @@ The function stands in place of `org-indent--compute-prefixes'."
 	       ;; At an headline, define new value for LEVEL.
 	       (unless (eq type 'inlinetask) (setq level nstars))))
 	    ;; List item: `wrap-prefix' is set where body starts.
-	    ((org-at-item-p)
-	     (org-indent-set-line-properties
-	      level (org-list-item-body-column (point))))
+	    ;; ((org-at-item-p)
+	    ;;  (org-indent-set-line-properties
+	    ;;   level
+	    ;;   (current-indentation)))
 	    ;; Regular line.
 	    (t
 	     (org-indent-set-line-properties
