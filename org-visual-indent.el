@@ -109,11 +109,11 @@
 (defun org-visual-indent--org-indent--compute-prefixes ()
   "Compute prefix strings for regular text and headlines.
 The function stands in place of `org-indent--compute-prefixes'."
-  (setq org-indent--heading-line-prefixes
+  (setq org-visual-indent--heading-line-prefixes
 	(make-vector org-indent--deepest-level nil))
-  (setq org-indent--inlinetask-line-prefixes
+  (setq org-visual-indent--inlinetask-line-prefixes
 	(make-vector org-indent--deepest-level nil))
-  (setq org-indent--text-line-prefixes
+  (setq org-visual-indent--text-line-prefixes
 	(make-vector org-indent--deepest-level nil))
   (dotimes (n org-indent--deepest-level)
     (let ((indentation (if (<= n 1) 0
@@ -121,7 +121,7 @@ The function stands in place of `org-indent--compute-prefixes'."
 			    (1- n)))))
       ;; Headlines line prefixes
       (let ((heading-prefix (org-visual-indent--calculate-prefix n)))
-	(aset org-indent--heading-line-prefixes
+	(aset org-visual-indent--heading-line-prefixes
 	      n
 	      (concat (if (> n 1)
 			  (concat 
@@ -129,7 +129,7 @@ The function stands in place of `org-indent--compute-prefixes'."
 			   (substring heading-prefix 0 -1))
 			"")))
 	;; Inline tasks line prefixes
-	(aset org-indent--inlinetask-line-prefixes
+	(aset org-visual-indent--inlinetask-line-prefixes
 	      n
 	      (cond ((<= n 1) "")
 		    ((bound-and-true-p org-inlinetask-show-first-star)
@@ -137,7 +137,7 @@ The function stands in place of `org-indent--compute-prefixes'."
 			     (substring heading-prefix 1)))
 		    (t heading-prefix)))
 	;; Text line prefixes.
-	(aset org-indent--text-line-prefixes
+	(aset org-visual-indent--text-line-prefixes
 	      n
 	      (concat 
 	       org-visual-indent-small-span
@@ -147,15 +147,15 @@ The function stands in place of `org-indent--compute-prefixes'."
     (level indentation &optional heading)
   "Replacement for `org-indent-set-line-properties'."
   (let* ((line (aref (pcase heading
-		       (`nil org-indent--text-line-prefixes)
-		       (`inlinetask org-indent--inlinetask-line-prefixes)
-		       (_ org-indent--heading-line-prefixes))
+		       (`nil org-visual-indent--text-line-prefixes)
+		       (`inlinetask org-visual-indent--inlinetask-line-prefixes)
+		       (_ org-visual-indent--heading-line-prefixes))
 		     level)))
     (add-text-properties (line-beginning-position) (line-beginning-position 2)
 			 `(line-prefix ,line
 				       wrap-prefix
 				       ,(if heading
-					    (aref org-indent--heading-line-prefixes
+					    (aref org-visual-indent--heading-line-prefixes
 						  (1+ level))
 					  line))))
   (forward-line))
@@ -207,7 +207,7 @@ The function stands in place of `org-indent--compute-prefixes'."
 	      (1+ level)
 	      (current-indentation)
 	      ;; When adapt indentation is 'headline-data, use
-	      ;; `org-indent--heading-line-prefixes' for setting
+	      ;; `org-visual-indent--heading-line-prefixes' for setting
 	      ;; headline data indentation.
 	      (and (eq org-adapt-indentation 'headline-data)
 		   (or (org-at-planning-p)
