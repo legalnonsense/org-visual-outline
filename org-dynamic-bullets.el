@@ -156,42 +156,43 @@ to be refreshed. Two options are:
 
 (defconst org-dynamic-bullets--font-lock-keyword
   `((,org-dynamic-bullets--heading-re
-     (1 (compose-region (match-beginning 1) (match-end 1)
-			(org-dynamic-bullets--create-heading-bullet)))))
+     (1 (progn (compose-region (match-beginning 1) (match-end 1)
+			       (org-dynamic-bullets--create-heading-bullet))
+	       nil))))
   "Font-lock keyword to fontify heading stars.")
 
 ;;;; Minor mode
 
-(define-minor-mode org-dynamic-bullets-mode
-  "Display orgmode trees."
-  nil
-  " dbullets"
-  nil
-  (if org-dynamic-bullets-mode
-      (progn
-	(when (fboundp 'org-bullets-mode)
-	  (org-bullets-mode -1))
-	(when (fboundp 'org-superstar-mode)
-	  (org-superstar-mode -1))
-	(org-dynamic-bullets--add-all-hooks-and-advice)
-	;; TODO: Do we need font lock at all?
-	;; If the refresh function (`org-dynamic-bullets--refresh-with-text-props')
-	;; deals with text properties directly (caveat: and effectively)
-	;; it seems the only purpose of using font-lock to ensure the leading stars
-	;; are replaced with a bullet when the user manually types the stars.
-	;; Does any orgmode user manually type the stars instead of M-RET,
-	;; or similar?  And, even if the user does type the stars, the stars
-	;; will still eventually be fontified when the hooks/funcs in 
-	;; `org-dynamic-bullets-update-triggers' are called. 
-	(cl-pushnew 'display font-lock-extra-managed-props)
-	(font-lock-add-keywords nil org-dynamic-bullets--font-lock-keyword)
-	(org-dynamic-bullets--fontify-buffer))
-    (font-lock-remove-keywords nil org-dynamic-bullets--font-lock-keyword)
-    (org-dynamic-bullets--add-all-hooks-and-advice 'remove)
-    (org-with-wide-buffer
-     (org-dynamic-bullets--fontify (point-min) (point-max) 'remove))
-    (font-lock-flush (point-min) (point-max))
-    (font-lock-ensure (point-min) (point-max))))
+  (define-minor-mode org-dynamic-bullets-mode
+    "Display orgmode trees."
+    nil
+    " dbullets"
+    nil
+    (if org-dynamic-bullets-mode
+	(progn
+	  (when (fboundp 'org-bullets-mode)
+	    (org-bullets-mode -1))
+	  (when (fboundp 'org-superstar-mode)
+	    (org-superstar-mode -1))
+	  (org-dynamic-bullets--add-all-hooks-and-advice)
+	  ;; TODO: Do we need font lock at all?
+	  ;; If the refresh function (`org-dynamic-bullets--refresh-with-text-props')
+	  ;; deals with text properties directly (caveat: and effectively)
+	  ;; it seems the only purpose of using font-lock to ensure the leading stars
+	  ;; are replaced with a bullet when the user manually types the stars.
+	  ;; Does any orgmode user manually type the stars instead of M-RET,
+	  ;; or similar?  And, even if the user does type the stars, the stars
+	  ;; will still eventually be fontified when the hooks/funcs in 
+	  ;; `org-dynamic-bullets-update-triggers' are called. 
+	  (cl-pushnew 'display font-lock-extra-managed-props)
+	  (font-lock-add-keywords nil org-dynamic-bullets--font-lock-keyword)
+	  (org-dynamic-bullets--fontify-buffer))
+      (font-lock-remove-keywords nil org-dynamic-bullets--font-lock-keyword)
+      (org-dynamic-bullets--add-all-hooks-and-advice 'remove)
+      (org-with-wide-buffer
+       (org-dynamic-bullets--fontify (point-min) (point-max) 'remove))
+      (font-lock-flush (point-min) (point-max))
+      (font-lock-ensure (point-min) (point-max))))
 
 ;;;; Functions
 
