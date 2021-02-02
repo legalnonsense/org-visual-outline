@@ -17,8 +17,15 @@ To get the above effect, clone the repository, put it in your load path and:
 There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The foreground and background color of =org-visual-indent-blank-pipe-face= should match your background. The foreground and background color of =org-visual-indent-pipe-face= should both be the desired color of the vertical line. By default, these colors are set based on the =default= face, which may or may not match the theme you are using if the the package is loaded before your theme is set. 
 
 [2021-02-02 Tue] New feature – custom colors for vertical lines
-
-
+The following code allows the user to define the color of the vertical bars:
+#+begin_src emacs-lisp :results silent
+  (setq org-visual-indent-color-indent '((1 . "blue")
+                                         (2 . "red")
+                                         (3 . "green")))
+#+end_src
+[[./vertical-bar-color-screenshot.png]]
+The colors will cycle through to the beginning of the list once the max depth is reached. This overrides the color set by 
+=org-visual-indent-pipe-face=. It also enforces a default height of .1 for the pipe face.
 
 
 Please open issues for any bugs. I am still testing this and feedback is welcome. 
