@@ -28,4 +28,7 @@ The colors will cycle through to the beginning of the list once the max depth is
 =org-visual-indent-pipe-face=. It also enforces a default height of .1 for the pipe face.
 
 
+If you do not want to use custom colors, set =org-visual-indent-color-indent= to =nil= (which is the default value) and the bars will be set using =org-visual-indent-pipe-face=. 
+
+
 Please open issues for any bugs. I am still testing this and feedback is welcome. 
