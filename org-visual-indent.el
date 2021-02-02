@@ -76,8 +76,8 @@
   `((t (:foreground ,(face-background 'default)
 		    :background ,(face-background 'default)
 		    :height .1)))
-  "Blank vertical bar face. Should match the background; must have the same height as 
-`org-visual-indent-pipe-face'."
+  "Blank vertical bar face. Should match the background; 
+must have the same height as `org-visual-indent-pipe-face'."
   :group 'org-visual-indent)
 
 ;;;; Customization
