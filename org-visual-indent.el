@@ -87,6 +87,16 @@
   :type 'string
   :group 'org-visual-indent)
 
+(defcustom org-visual-indent-color-indent nil
+  "Individually color vertical lines. Alist in the form:
+'((1 . \"blue\")
+  (2 . \"red\")
+  (3 . \"green\"))
+The colors will cycle through to the beginning of the list
+once the max depth is reached. This overrides the color set by 
+`org-visual-indent-pipe-face'. It also enforces a default
+height of .1 for the pipe face.")
+
 ;;;; Constants
 
 (defconst org-visual-indent-pipe "│"
@@ -103,8 +113,20 @@
 (defun org-visual-indent--calculate-prefix (level)
   "Calculate the prefix strings used by `org-indent'"
   (cl-loop for x from 1 to (1- level)
-	   concat (concat org-visual-indent-pipe
-			  org-visual-indent-span)))
+	   concat (concat
+		   (if org-visual-indent-color-indent
+		       (let* ((length (length org-visual-indent-color-indent))
+			      (color
+			       (alist-get
+				(if (= (% x length) 0) length (% x length))
+				org-visual-indent-color-indent)))
+			 (propertize 
+			  org-visual-indent-pipe
+			  'face `(:foreground ,color
+					      :background ,color
+					      :height .1)))
+		     org-visual-indent-pipe)
+		   org-visual-indent-span)))
 
 (defun org-visual-indent--org-indent--compute-prefixes ()
   "Compute prefix strings for regular text and headlines.
