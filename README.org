@@ -19,10 +19,13 @@ There are two faces you’ll want to set if you use =org-visual-indent=: =org-vi
 [2021-02-02 Tue] New feature – custom colors for vertical lines
 The following code allows the user to define the color of the vertical bars:
 #+begin_src emacs-lisp :results silent
-  (setq org-visual-indent-color-indent '((1 (:background "blue" :height .1)
-                                         (2 (:background "red" :height .1)
-                                         (3 (:background "green" :height .1))))))
+  (setq org-visual-indent-color-indent '((1 (:background "blue" :height .1))
+                                         (2 (:background "red" :height .1))
+                                         (3 (:background "green" :height .1))))
 #+end_src
+
+
+
 [[./vertical-bar-color-screenshot.png]]
 
 The colors will cycle through to the beginning of the list once the max depth is reached. This overrides the color set by 
