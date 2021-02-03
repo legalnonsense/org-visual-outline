@@ -24,8 +24,6 @@ The following code allows the user to define the color of the vertical bars:
                                          (3 (:background "green" :height .1))))
 #+end_src
 
-
-
 [[./vertical-bar-color-screenshot.png]]
 
 The colors will cycle through to the beginning of the list once the max depth is reached. This overrides the color set by 
