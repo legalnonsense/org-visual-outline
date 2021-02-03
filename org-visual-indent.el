@@ -89,17 +89,17 @@ must have the same height as `org-visual-indent-pipe-face'."
 
 (defcustom org-visual-indent-color-indent nil
   "Individually color vertical lines. Alist in the form:
-'((1 . \"blue\")
-  (2 . \"red\")
-  (3 . \"green\"))
+'((1 (:background \"blue\" :height .1))
+  (2 (:background \"red\" :height .1))
+  (3 (:background \"green\" :height .1)))
 The colors will cycle through to the beginning of the list
 once the max depth is reached. This overrides the color set by 
-`org-visual-indent-pipe-face'. It also enforces a default
-height of .1 for the pipe face.")
+`org-visual-indent-pipe-face'.  Be sure to set the height of
+the face (recommended value of .1).")
 
 ;;;; Constants
 
-(defconst org-visual-indent-pipe "│"
+(defconst org-visual-indent-pipe " "
   "Pipe character.  (For some reason a space does not seem to work.)")
 
 (defconst org-visual-indent-blank-pipe " "
@@ -116,15 +116,17 @@ height of .1 for the pipe face.")
 	   concat (concat
 		   (if org-visual-indent-color-indent
 		       (let* ((length (length org-visual-indent-color-indent))
-			      (color
+			      (face
 			       (alist-get
 				(if (= (% x length) 0) length (% x length))
 				org-visual-indent-color-indent)))
 			 (propertize 
 			  org-visual-indent-pipe
-			  'face `(:foreground ,color
-					      :background ,color
-					      :height .1)))
+			  'face
+			  face))
+		     ;; `(:foreground ,color
+		     ;; 		:background ,color
+		     ;; 		:height .1)))
 		     org-visual-indent-pipe)
 		   org-visual-indent-span)))
 
