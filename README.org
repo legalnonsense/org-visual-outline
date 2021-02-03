@@ -14,23 +14,55 @@ To get the above effect, clone the repository, put it in your load path and:
 
 =org-dynamic-bullets= does not provide any indentation or way to discern the level of a heading (i.e., it replaces all leading stars with a single bullet and without indentation). If you don't like the vertical lines shown above, use it with vanilla =org-indent-mode=. 
 
-There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The foreground and background color of =org-visual-indent-blank-pipe-face= should match your background. The foreground and background color of =org-visual-indent-pipe-face= should both be the desired color of the vertical line. By default, these colors are set based on the =default= face, which may or may not match the theme you are using if the the package is loaded before your theme is set. I recommend using a height of .1 for these faces, which is the default. 
+There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The /foreground and background/ color of =org-visual-indent-blank-pipe-face= should match your background. The /foreground and background/ color of =org-visual-indent-pipe-face= should both be the desired color of the vertical line. By default, these colors are set based on the =default= face, which may or may not match the theme you are using if the the package is loaded before your theme is set. I recommend using a height of .1 for these faces, which is the default. 
 
 [2021-02-02 Tue] New feature – custom colors for vertical lines
 The following code allows the user to define the color of the vertical bars:
 #+begin_src emacs-lisp :results silent
-  (setq org-visual-indent-color-indent '((1 (:background "blue" :height .1))
-                                         (2 (:background "red" :height .1))
-                                         (3 (:background "green" :height .1))))
+  (setq org-visual-indent-color-indent '((1 (:background "blue" :foreground "blue" :height .1))
+                                         (2 (:background "red" :foreground "red" :height .1))
+                                         (3 (:background "green" :foreground "green" :height .1))))
 #+end_src
+
+
 
 [[./vertical-bar-color-screenshot.png]]
 
 The colors will cycle through to the beginning of the list once the max depth is reached. This overrides the color set by 
 =org-visual-indent-pipe-face=. It also enforces a default height of .1 for the pipe face.
 
+One good use of these colors would be to set it to match the org-heading face at point:
 
-If you do not want to use custom colors, set =org-visual-indent-color-indent= to =nil= (which is the default value) and the bars will be set using =org-visual-indent-pipe-face=. 
+#+begin_src emacs-lisp :results silent
+
+(setq org-visual-indent-color-indent
+        (cl-loop for x from 1 to 8
+                 collect `(,x ,(list :background (or (face-foreground
+                                                      (intern 
+                                                       (concat "org-level-"
+                                                               (number-to-string x))))
+                                                     (face-foreground 'org-level-1))
+				   :foreground (or (face-foreground
+                                                      (intern 
+                                                       (concat "org-level-"
+                                                               (number-to-string x))))
+                                                     (face-foreground 'org-level-1))
+                                     :height .1))))
+
+#+end_src
+
+Or you can create a gradient (this uses some functions from https://github.com/legalnonsense/elgantt/):
+
+#+begin_src emacs-lisp :results silent
+  (setq org-visual-indent-color-indent
+        (cl-loop for x from 1 to 5
+                 for color in (elgantt--create-gradient "gray" "black" 5)
+                 collect `(,x  ,(list :background (elgantt--color-rgb-to-hex color)
+                                      :foreground (elgantt--color-rgb-to-hex color)
+                                      :height .1 ))))
+#+end_src
+
+If you do not want to use custom colors, set =org-visual-indent-color-indent= to =nil= (which is the default value) and the bars will be set using =org-visual-indent-pipe-face=.
 
 
 Please open issues for any bugs. I am still testing this and feedback is welcome. 
