@@ -24,7 +24,7 @@ The bullets are updated using various org-mode cycling and insertion hooks and a
 
 =org-dynamic-bullets= does not provide any indentation or way to discern the level of a heading (i.e., it replaces all leading stars with a single bullet and without indentation). If you don't like the vertical lines shown above, use it with vanilla =org-indent-mode=.
 
-* org-visual indent
+* org-visual-indent
 
 There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The /foreground and background/ color of =org-visual-indent-blank-pipe-face= should match your background. You need to set both of these faces to the same height.
 
@@ -35,6 +35,8 @@ You need to set both the foreground and background colors for there to be an unb
 I like using a height of .1 for these faces, which is the default, but you can make the lines thicker with a higher value.
 
 If the vertical lines do not align properly, you’ll have to fuck with =org-visual-indent-span=, which is a bunch of spaces and represents the space between the vertical lines.
+
+This package appropriates (via advice) much of =org-indent= and will likely break the moment =org-indent= is updated. Everything words with Org 9.4. Until I pull out the useful parts of =org-indent= and package them separately, you’ll just have to hope nothing breaks.
 
 ** Custom vertical line colors
 The following variable allows the user to define the color of the vertical bars:
