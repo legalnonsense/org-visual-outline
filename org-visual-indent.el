@@ -89,9 +89,9 @@ must have the same height as `org-visual-indent-pipe-face'."
 
 (defcustom org-visual-indent-color-indent nil
   "Individually color vertical lines. Alist in the form:
-'((1 (:background \"blue\" :height .1))
-  (2 (:background \"red\" :height .1))
-  (3 (:background \"green\" :height .1)))
+'((1 (:background \"blue\" :foreground \"blue\" :height .1))
+  (2 (:background \"red\" :foreground \"red\" :height .1))
+  (3 (:background \"green\" :foreground \"green\" :height .1)))
 The colors will cycle through to the beginning of the list
 once the max depth is reached. This overrides the color set by 
 `org-visual-indent-pipe-face'.  Be sure to set the height of
