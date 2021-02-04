@@ -74,6 +74,7 @@ One nice use of these colors would be to set it to match the org-heading face at
 #+end_src
 
 Or you can create a gradient:
+
 [[./gradient-outline.png]]
 
 #+begin_src emacs-lisp :results silent
