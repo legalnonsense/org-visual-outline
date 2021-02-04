@@ -1,8 +1,6 @@
 [[./screenshot.gif]]
 
-This project is still being developed. I promise nothing. 
-
-This package is now split into two separate packages: =org-dynamic-bullets= which handles the dynamic bullets, and =org-visual-indent= which adds vertical lines to =org-indent=. They can be used independently. 
+This package is split into two separate packages: =org-dynamic-bullets= which handles the dynamic bullets, and =org-visual-indent= which adds vertical lines to =org-indent=. They can be used independently. 
 
 To get the above effect, clone the repository, put it in your load path and:
 #+begin_src emacs-lisp :results silent
@@ -11,13 +9,35 @@ To get the above effect, clone the repository, put it in your load path and:
   (org-dynamic-bullets-mode)
   (org-visual-indent-mode)
 #+end_src
+* org-dynamic-bullets
+The icons are meaningful. ▶ means the heading has children and is folded. ▼ means the heading is unfolded. ▬ means the heading does not have any children. If the icon is filled (i.e., ▬ or ▼), it means the heading has text in its body. If the icon is not filled (i.e., ▭ or ▽), it means there is no body text. You can customize these characters by setting the following variables: 
+| variable                                         | default |
+|--------------------------------------------------+---------|
+| org-dynamic-bullets-folded-body-text-bullet      | "▶"     |
+| org-dynamic-bullets-folded-no-body-text-bullet   | "▷"     |
+| org-dynamic-bullets-unfolded-body-text-bullet    | "▼"     |
+| org-dynamic-bullets-unfolded-no-body-text-bullet | "▽"     |
+| org-dynamic-bullets-leaf-body-text-bullet        | "▬"     |
+| org-dynamic-bullets-leaf-no-body-text-bullet     | "▭"     |
 
-=org-dynamic-bullets= does not provide any indentation or way to discern the level of a heading (i.e., it replaces all leading stars with a single bullet and without indentation). If you don't like the vertical lines shown above, use it with vanilla =org-indent-mode=. 
+The bullets are updated using various org-mode cycling and insertion hooks and also by relying on font lock. There may be better ways to do this, but it has not resulted in any detectable slow down for me. 
 
-There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The /foreground and background/ color of =org-visual-indent-blank-pipe-face= should match your background. The /foreground and background/ color of =org-visual-indent-pipe-face= should both be the desired color of the vertical line. By default, these colors are set based on the =default= face, which may or may not match the theme you are using if the the package is loaded before your theme is set. I recommend using a height of .1 for these faces, which is the default. 
+=org-dynamic-bullets= does not provide any indentation or way to discern the level of a heading (i.e., it replaces all leading stars with a single bullet and without indentation). If you don't like the vertical lines shown above, use it with vanilla =org-indent-mode=.
 
-[2021-02-02 Tue] New feature – custom colors for vertical lines
-The following code allows the user to define the color of the vertical bars:
+* org-visual indent
+
+There are two faces you’ll want to set if you use =org-visual-indent=: =org-visual-indent-pipe-face= and =org-visual-indent-blank-pipe-face=. The /foreground and background/ color of =org-visual-indent-blank-pipe-face= should match your background. You need to set both of these faces to the same height.
+
+The /foreground and background/ color of =org-visual-indent-pipe-face= should both be the desired color of the vertical line. By default, these colors are set based on the =default= face, which may or may not match the theme you are using if the the package is loaded before your theme is set. If you load =org-visual-outline-mode= before you set your theme, 
+
+You need to set both the foreground and background colors for there to be an unbroken vertical line from one line of next to the next. 
+
+I like using a height of .1 for these faces, which is the default, but you can make the lines thicker with a higher value.
+
+If the vertical lines do not align properly, you’ll have to fuck with =org-visual-indent-span=, which is a bunch of spaces and represents the space between the vertical lines.
+
+** Custom vertical line colors
+The following variable allows the user to define the color of the vertical bars:
 #+begin_src emacs-lisp :results silent
   (setq org-visual-indent-color-indent '((1 (:background "blue" :foreground "blue" :height .1))
                                          (2 (:background "red" :foreground "red" :height .1))
@@ -31,38 +51,47 @@ The following code allows the user to define the color of the vertical bars:
 The colors will cycle through to the beginning of the list once the max depth is reached. This overrides the color set by 
 =org-visual-indent-pipe-face=. It also enforces a default height of .1 for the pipe face.
 
-One good use of these colors would be to set it to match the org-heading face at point:
+One nice use of these colors would be to set it to match the org-heading face at point.
 
-#+begin_src emacs-lisp :results silent
-
-(setq org-visual-indent-color-indent
-        (cl-loop for x from 1 to 8
-                 collect `(,x ,(list :background (or (face-foreground
-                                                      (intern 
-                                                       (concat "org-level-"
-                                                               (number-to-string x))))
-                                                     (face-foreground 'org-level-1))
-				   :foreground (or (face-foreground
-                                                      (intern 
-                                                       (concat "org-level-"
-                                                               (number-to-string x))))
-                                                     (face-foreground 'org-level-1))
-                                     :height .1))))
-
-#+end_src
-
-Or you can create a gradient (this uses some functions from https://github.com/legalnonsense/elgantt/):
+[[./matching-org-headings.png]]
 
 #+begin_src emacs-lisp :results silent
   (setq org-visual-indent-color-indent
-        (cl-loop for x from 1 to 5
-                 for color in (elgantt--create-gradient "gray" "black" 5)
-                 collect `(,x  ,(list :background (elgantt--color-rgb-to-hex color)
-                                      :foreground (elgantt--color-rgb-to-hex color)
-                                      :height .1 ))))
+        (cl-loop for x from 1 to 8
+                 with color = nil
+                 do (setq color (or (face-foreground
+                                     (intern 
+                                      (concat "org-level-"
+                                              (number-to-string x))))
+                                    (face-foreground 'org-level-1)))
+                 collect `(,x ,(list :background color
+                                     :foreground color
+                                     :height .1))))
+
+  ;; If you don’t have all of the org-level-x faces set, this will use
+  ;; org-level-1 as the backup. Or figure out your own way of doing it.
+  ;; None of it matters anyway. 
 #+end_src
 
-If you do not want to use custom colors, set =org-visual-indent-color-indent= to =nil= (which is the default value) and the bars will be set using =org-visual-indent-pipe-face=.
+Or you can create a gradient:
+[[./gradient-outline.png]]
 
+#+begin_src emacs-lisp :results silent
+  ;; This uses some functions from https://github.com/legalnonsense/elgantt/,
+  ;; but you can accomplish the same thing with built in functions from the `color’
+  ;; package. But you’ll have to read the documentation and I choose not
+  ;; to do that right now.
+
+   (setq org-visual-indent-color-indent
+         (cl-loop for x from 1 to 5
+                  for color in (elgantt--create-gradient "gray" "black" 5)
+                  collect `(,x  ,(list :background (elgantt--color-rgb-to-hex color)
+                                       :foreground (elgantt--color-rgb-to-hex color)
+                                       :height .1 ))))
+#+end_src
+
+If you do not want to use custom colors, set =org-visual-indent-color-indent= to =nil= (which is the default value) and the bars will be set using =org-visual-indent-pipe-face=. 
+
+The line colors are loaded once when the minor mode is activated. If you experiment with the colors, you’ll have to turn =org-visual-indent-mode= off and on for the changes to take effect. 
 
 Please open issues for any bugs. I am still testing this and feedback is welcome. 
