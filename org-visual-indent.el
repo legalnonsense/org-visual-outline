@@ -124,9 +124,6 @@ the face (recommended value of .1).")
 			  org-visual-indent-pipe
 			  'face
 			  face))
-		     ;; `(:foreground ,color
-		     ;; 		:background ,color
-		     ;; 		:height .1)))
 		     org-visual-indent-pipe)
 		   org-visual-indent-span)))
 
