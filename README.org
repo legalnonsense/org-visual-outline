@@ -13,12 +13,12 @@ To get the above effect, clone the repository, put it in your load path and:
 The icons are meaningful. ▶ means the heading has children and is folded. ▼ means the heading is unfolded. ▬ means the heading does not have any children. If the icon is filled (i.e., ▬ or ▼), it means the heading has text in its body. If the icon is not filled (i.e., ▭ or ▽), it means there is no body text. You can customize these characters by setting the following variables: 
 | variable                                         | default |
 |--------------------------------------------------+---------|
-| org-dynamic-bullets-folded-body-text-bullet      | "▶"     |
-| org-dynamic-bullets-folded-no-body-text-bullet   | "▷"     |
-| org-dynamic-bullets-unfolded-body-text-bullet    | "▼"     |
-| org-dynamic-bullets-unfolded-no-body-text-bullet | "▽"     |
-| org-dynamic-bullets-leaf-body-text-bullet        | "▬"     |
-| org-dynamic-bullets-leaf-no-body-text-bullet     | "▭"     |
+| org-dynamic-bullets-folded-body-text-bullet      | =▶=       |
+| org-dynamic-bullets-folded-no-body-text-bullet   | =▷=       |
+| org-dynamic-bullets-unfolded-body-text-bullet    | =▼=       |
+| org-dynamic-bullets-unfolded-no-body-text-bullet | =▽=       |
+| org-dynamic-bullets-leaf-body-text-bullet        | =▬=       |
+| org-dynamic-bullets-leaf-no-body-text-bullet     | =▭=       |
 
 The bullets are updated using various org-mode cycling and insertion hooks and also by relying on font lock. There may be better ways to do this, but it has not resulted in any detectable slow down for me. 
 
