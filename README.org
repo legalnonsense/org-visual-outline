@@ -79,16 +79,18 @@ Or you can create a gradient:
 
 #+begin_src emacs-lisp :results silent
   ;; This uses some functions from https://github.com/legalnonsense/elgantt/,
-  ;; but you can accomplish the same thing with built in functions from the `color’
-  ;; package. But you’ll have to read the documentation and I choose not
-  ;; to do that right now.
+  ;; but you can accomplish the same thing with built in functions from the
+  ;; `color’  package.  But you’ll have to read the documentation and I choose
+  ;; not to do that right now.  Or just do it by hand.  The world is a cold
+  ;; place and you will die.  Choose the color scheme, and the means of setting
+  ;; it, that brings you happiness. 
 
-   (setq org-visual-indent-color-indent
-         (cl-loop for x from 1 to 5
-                  for color in (elgantt--create-gradient "gray" "black" 5)
-                  collect `(,x  ,(list :background (elgantt--color-rgb-to-hex color)
-                                       :foreground (elgantt--color-rgb-to-hex color)
-                                       :height .1 ))))
+    (setq org-visual-indent-color-indent
+          (cl-loop for x from 1 to 5
+                   for color in (elgantt--create-gradient "gray" "black" 5)
+                   collect `(,x  ,(list :background (elgantt--color-rgb-to-hex color)
+                                        :foreground (elgantt--color-rgb-to-hex color)
+                                        :height .1 ))))
 #+end_src
 
 If you do not want to use custom colors, set =org-visual-indent-color-indent= to =nil= (which is the default value) and the bars will be set using =org-visual-indent-pipe-face=. 
