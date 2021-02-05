@@ -36,7 +36,7 @@ I like using a height of .1 for these faces, which is the default, but you can m
 
 If the vertical lines do not align properly, you’ll have to fuck with =org-visual-indent-span=, which is a bunch of spaces and represents the space between the vertical lines.
 
-This package appropriates (via advice) much of =org-indent= and will likely break the moment =org-indent= is updated. Everything words with Org 9.4. Until I pull out the useful parts of =org-indent= and package them separately, you’ll just have to hope nothing breaks.
+This package appropriates (via advice) much of =org-indent= and will likely break if =org-indent= gets a substantive updated. Everything words with Org 9.4. Until I pull out the useful parts of =org-indent= and package them separately, you’ll just have to hope nothing breaks.
 
 ** Custom vertical line colors
 The following variable allows the user to define the color of the vertical bars:
