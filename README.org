@@ -51,7 +51,7 @@ The following variable allows the user to define the color of the vertical bars:
 [[./vertical-bar-color-screenshot.png]]
 
 The colors will cycle through to the beginning of the list once the max depth is reached. This overrides the color set by 
-=org-visual-indent-pipe-face=. It also enforces a default height of .1 for the pipe face.
+=org-visual-indent-pipe-face=. 
 
 One nice use of these colors would be to set it to match the org-heading face at point.
 
