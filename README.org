@@ -66,9 +66,10 @@ One nice use of these colors would be to set it to match the org-heading face at
                                       (concat "org-level-"
                                               (number-to-string x))))
                                     (face-foreground 'org-level-1)))
-                 collect `(,x ,(list :background color
-                                     :foreground color
-                                     :height .1))))
+                 collect `(,x ,(list
+                                :background color
+                                :foreground color
+                                :height .1))))
 
   ;; If you don’t have all of the org-level-x faces set, this will use
   ;; org-level-1 as the backup. Or figure out your own way of doing it.
