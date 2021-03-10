@@ -277,7 +277,7 @@ This function searches the region for the headline regexp and calls
 	 (save-excursion
 	   (funcall org-dynamic-bullets-refresh-func
 		    (match-beginning 1)
-		    (match-end 1)))))))))
+		    (match-end 1))))))))
 
 (defun org-dynamic-bullets--fontify-buffer (&rest _)
   "Fontify the entire buffer."
