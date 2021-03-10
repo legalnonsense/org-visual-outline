@@ -277,7 +277,7 @@ This function searches the region for the headline regexp and calls
 	 (save-excursion
 	   (funcall org-dynamic-bullets-refresh-func
 		    (match-beginning 1)
-		    (match-end 1))))))))
+		    (match-end 1)))))))))
 
 (defun org-dynamic-bullets--fontify-buffer (&rest _)
   "Fontify the entire buffer."
@@ -285,16 +285,15 @@ This function searches the region for the headline regexp and calls
 
 (defun org-dynamic-bullets--fontify-tree (&rest _)
   "Fontify the entire tree from root to last leaf."
-  (when org-dynamic-bullets-mode
-    (when-let* ((level (org-current-level))
-		(beg (save-excursion (if (= 1 level)
-					 (progn (beginning-of-line)
-						(point))
-				       (while (org-up-heading-safe))
-				       (point))))
-		(end (save-excursion (outline-end-of-subtree)
+  (when-let* ((level (org-current-level))
+	      (beg (save-excursion (if (= 1 level)
+				       (progn (beginning-of-line)
+					      (point))
+				     (while (org-up-heading-safe))
 				     (point))))
-      (org-dynamic-bullets--fontify beg end))))
+	      (end (save-excursion (outline-end-of-subtree)
+				   (point))))
+    (org-dynamic-bullets--fontify beg end)))
 
 (defun org-dynamic-bullets--fontify-heading (&rest _)
   "Fontify the current heading only."
@@ -306,32 +305,29 @@ This function searches the region for the headline regexp and calls
 
 (defun org-dynamic-bullets--fontify-heading-and-previous-sibling (&rest _)
   "Fontify the current heading and previous sibling."
-  (when org-dynamic-bullets-mode
-    (let ((beg (save-excursion (or (outline-get-last-sibling)
-				   (outline-previous-heading))
-			       (point)))
-	  (end (line-beginning-position 2)))
-      (org-dynamic-bullets--fontify beg end))))
+  (let ((beg (save-excursion (or (outline-get-last-sibling)
+				 (outline-previous-heading))
+			     (point)))
+	(end (line-beginning-position 2)))
+    (org-dynamic-bullets--fontify beg end)))
 
 (defun org-dynamic-bullets--fontify-heading-and-parent (&rest _)
   "Fontify the current heading only."
-  (when org-dynamic-bullets-mode
-    (let ((beg (save-excursion (org-up-heading-safe)
-			       (point)))
-	  (end (save-excursion (org-next-visible-heading 1)
-			       (point))))
-      (org-dynamic-bullets--fontify beg end))))
+  (let ((beg (save-excursion (org-up-heading-safe)
+			     (point)))
+	(end (save-excursion (org-next-visible-heading 1)
+			     (point))))
+    (org-dynamic-bullets--fontify beg end)))
 
 (defun org-dynamic-bullets--fontify-children (&rest _)
   "Fontify current heading to last child."
-  (when org-dynamic-bullets-mode
-    (save-excursion
-      (when (org-back-to-heading)
-	(let ((beg (point-at-bol))
-	      (end (save-excursion
-		     (outline-end-of-subtree)
-		     (point))))
-	  (org-dynamic-bullets--fontify beg end))))))
+  (save-excursion
+    (when (org-back-to-heading)
+      (let ((beg (point-at-bol))
+	    (end (save-excursion
+		   (outline-end-of-subtree)
+		   (point))))
+	(org-dynamic-bullets--fontify beg end)))))
 
 (defun org-dynamic-bullets--org-cycle-hook-func (state)
   "Called after `org-cyle'."
