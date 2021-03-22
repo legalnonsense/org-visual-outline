@@ -299,10 +299,8 @@ This function searches the region for the headline regexp and calls
 (defun org-dynamic-bullets--fontify-heading (&rest _)
   "Fontify the current heading only."
   (save-excursion 
-    (when (and org-dynamic-bullets-mode
-	       (org-back-to-heading))
-      (org-dynamic-bullets--fontify (point-at-bol)
-				    (point-at-eol)))))
+    (org-dynamic-bullets--fontify (point-at-bol)
+				  (point-at-eol))))
 
 (defun org-dynamic-bullets--fontify-heading-and-previous-sibling (&rest _)
   "Fontify the current heading and previous sibling."
