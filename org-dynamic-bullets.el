@@ -268,17 +268,18 @@ the heading and before the next heading."
 All fontifying functions use this function as their base.  
 This function searches the region for the headline regexp and calls 
 `org-dynamic-bullets-refresh-func' to act on the matches."
-  (unless (org-before-first-heading-p)
-    (org-with-wide-buffer 
-     (save-excursion
-       (save-match-data 
-	 (goto-char beg)
-	 (while
-	     (re-search-forward org-dynamic-bullets--heading-re end t)
-	   (save-excursion
-	     (funcall org-dynamic-bullets-refresh-func
-		      (match-beginning 1)
-		      (match-end 1)))))))))
+  (when org-dynamic-bullets-mode 
+    (unless (org-before-first-heading-p)
+      (org-with-wide-buffer 
+       (save-excursion
+	 (save-match-data 
+	   (goto-char beg)
+	   (while
+	       (re-search-forward org-dynamic-bullets--heading-re end t)
+	     (save-excursion
+	       (funcall org-dynamic-bullets-refresh-func
+			(match-beginning 1)
+			(match-end 1))))))))))
 
 (defun org-dynamic-bullets--fontify-buffer (&rest _)
   "Fontify the entire buffer."
