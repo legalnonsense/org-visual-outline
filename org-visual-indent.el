@@ -5,7 +5,7 @@
 ;; Author: Jeff Filipovits <jrfilipovits@gmail.com>
 ;; Url: https://github.com/legalnonsense/org-dynamic-bullets
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "26.1") (org "9.0")
+;; Package-Requires: ((emacs "26.1") (org "9.0"))
 ;;
 ;; Keywords: Org, outline
 
