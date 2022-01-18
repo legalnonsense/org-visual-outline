@@ -168,6 +168,7 @@ to be refreshed. Two options are:
 
 ;;;; Minor mode
 
+;;;###autoload
 (define-minor-mode org-dynamic-bullets-mode
   "Display orgmode trees."
   nil

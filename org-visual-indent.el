@@ -258,6 +258,7 @@ The function stands in place of `org-indent--compute-prefixes'."
        level indentation heading)
     (funcall func level indentation heading)))
 
+;;;###autoload
 (define-minor-mode org-visual-indent-mode 
   "Add vertical lines to `org-indent'."
   nil
