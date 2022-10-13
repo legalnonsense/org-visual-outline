@@ -122,12 +122,12 @@ below."
   :type 'string
   :group 'org-dynamic-bullets)
 
-(defcustom org-dynamic-bullets-leaf-body-text-bullet "▬"
+(defcustom org-dynamic-bullets-leaf-body-text-bullet "■"
   "Bullet for a leaf node with body text."
   :type 'string
   :group 'org-dynamic-bullets)
 
-(defcustom org-dynamic-bullets-leaf-no-body-text-bullet "▭"
+(defcustom org-dynamic-bullets-leaf-no-body-text-bullet "□"
   "Bullet for a leaf node with no body text."
   :type 'string
   :group 'org-dynamic-bullets)
