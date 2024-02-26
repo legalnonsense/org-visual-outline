@@ -207,17 +207,21 @@ to be refreshed. Two options are:
   (save-excursion
     (org-back-to-heading)
     (end-of-line)
-    (outline-invisible-p)))
+    (if (fboundp 'org-fold-folded-p)
+	(org-fold-folded-p)
+      (outline-invisible-p))))
 
 (defun org-dynamic-bullets--body-p ()
   "Does the current heading have text in its body? \"Body\" is
 defined as any text, including property drawers, following
 the heading and before the next heading."
-  (cddr (car (org-element--parse-elements
-	      (point)
-	      (save-excursion (or (outline-next-heading)
-				  (point-max)))
-	      nil nil nil nil nil))))
+  nil)
+  ;; As of emacs 29 there is a bug here. 
+  ;; (cddr (car (org-element--parse-elements
+  ;; 	      (point)
+  ;; 	      (save-excursion (or (outline-next-heading)
+  ;; 				  (point-max)))
+  ;; 	      nil nil nil nil nil))))
 
 ;;;;; Creating prefix strings
 
